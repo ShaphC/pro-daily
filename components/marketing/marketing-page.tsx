@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,8 +15,9 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 
 function ProductPreview() {
   const priorities = [
@@ -133,24 +136,7 @@ function ProductPreview() {
               </div>
 
               <div className="min-h-[300px] overflow-hidden rounded-xl border border-black/10 bg-stone-100/70 p-4 dark:border-white/10 dark:bg-stone-900/60 md:min-h-[395px]">
-                <PreviewTyping
-                  text="The simpler workflow is working."
-                  delay={900}
-                />
-
-                <PreviewTyping
-                  text="Keep the daily page focused and avoid turning it into another project management system."
-                  delay={2400}
-                  className="mt-3"
-                />
-
-                <PreviewTyping
-                  text="Review the remaining priorities tomorrow and continue from where the work left off."
-                  delay={4700}
-                  className="mt-3"
-                />
-
-                <span className="mt-2 inline-block h-3 w-px animate-caret bg-black/40 dark:bg-white/40" />
+                <PreviewTypingNotes />
               </div>
 
               <p className="mt-1.5 text-right text-[8px] font-medium text-black/30 dark:text-white/25">
@@ -231,11 +217,13 @@ function PreviewDailyRow({
   completed = false,
   emphasis = false,
   rank,
+  animationDelay = 0,
 }: {
   text: string;
   completed?: boolean;
   emphasis?: boolean;
   rank?: number;
+  animationDelay?: number;
 }) {
   return (
     <div
@@ -244,6 +232,11 @@ function PreviewDailyRow({
           ? "border-black/10 bg-white dark:border-white/10 dark:bg-stone-950"
           : "border-black/6 bg-white/50 dark:border-white/6 dark:bg-white/[0.015]"
       }`}
+      style={
+        {
+          "--row-animation-delay": `${animationDelay}ms`,
+        } as React.CSSProperties
+      }
     >
       <div
         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-500 ${
@@ -280,34 +273,113 @@ function PreviewDailyRow({
   );
 }
 
-function PreviewTyping({
-  text,
-  delay = 0,
-  className = "",
-}: {
-  text: string;
-  delay?: number;
-  className?: string;
-}) {
+function PreviewTypingNotes() {
+  const paragraphs = [
+    "The simpler workflow is working.",
+    "Keep the daily page focused and avoid turning it into another project management system.",
+    "Review the remaining priorities tomorrow and continue from where the work left off.",
+  ];
+
+  const [visibleLengths, setVisibleLengths] = useState([0, 0, 0]);
+  const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const wait = (milliseconds: number) =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, milliseconds);
+      });
+
+    const getTypingDelay = (character: string) => {
+      if (character === ".") {
+        return 220 + Math.floor(Math.random() * 100);
+      }
+
+      if (character === ",") {
+        return 130 + Math.floor(Math.random() * 70);
+      }
+
+      if (character === " ") {
+        return 18 + Math.floor(Math.random() * 16);
+      }
+
+      return 28 + Math.floor(Math.random() * 24);
+    };
+
+    const runTypingCycle = async () => {
+      while (!cancelled) {
+        setVisibleLengths([0, 0, 0]);
+        setFinished(false);
+
+        await wait(700);
+
+        for (
+          let paragraphIndex = 0;
+          paragraphIndex < paragraphs.length;
+          paragraphIndex++
+        ) {
+          const paragraph = paragraphs[paragraphIndex];
+
+          for (
+            let characterIndex = 1;
+            characterIndex <= paragraph.length;
+            characterIndex++
+          ) {
+            if (cancelled) {
+              return;
+            }
+
+            setVisibleLengths((current) => {
+              const next = [...current];
+              next[paragraphIndex] = characterIndex;
+              return next;
+            });
+
+            await wait(getTypingDelay(paragraph[characterIndex - 1]));
+          }
+
+          if (paragraphIndex < paragraphs.length - 1) {
+            await wait(500);
+          }
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setFinished(true);
+
+        await wait(3200);
+      }
+    };
+
+    runTypingCycle();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
-    <p
-      className={`text-[10px] font-medium leading-5 text-black/55 dark:text-white/45 ${className}`}
+    <div
+      className="preview-notes-typing text-[10px] font-medium leading-5 text-black/55 dark:text-white/45"
       aria-hidden="true"
     >
-      {Array.from(text).map((character, index) => (
-        <span
-          key={`${text}-${index}`}
-          className="animate-note-character"
-          style={
-            {
-              "--char-delay": `${delay + index * 24}ms`,
-            } as React.CSSProperties
-          }
-        >
-          {character === " " ? "\u00A0" : character}
-        </span>
+      {paragraphs.map((paragraph, paragraphIndex) => (
+        <p key={paragraph} className="mb-3 last:mb-0">
+          {paragraph.slice(0, visibleLengths[paragraphIndex])}
+        </p>
       ))}
-    </p>
+
+      <div className="mt-3 h-4">
+        <span
+          className={`preview-note-bottom-cursor ${
+            finished ? "preview-note-bottom-cursor-active" : ""
+          }`}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -401,10 +473,33 @@ function FeatureNumber({
   );
 }
 
-export async function MarketingPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(data?.claims?.sub);
+export function MarketingPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    let active = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) {
+        setIsAuthenticated(Boolean(data.session));
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) {
+        setIsAuthenticated(Boolean(session));
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const ctaHref = isAuthenticated ? "/today" : "/signup";
   const ctaLabel = isAuthenticated ? "Go to Today" : "Start for free";
@@ -576,34 +671,18 @@ export async function MarketingPage() {
           }
         }
 
-        @keyframes note-character {
-          0% {
-            opacity: 0;
-          }
-          1% {
-            opacity: 1;
-          }
-          70% {
-            opacity: 1;
-          }
-          82%,
-          100% {
-            opacity: 0;
-          }
-        }
-
-        @keyframes caret {
+        @keyframes note-bottom-cursor {
           0%,
-          45% {
-            opacity: 1;
-          }
-          46%,
-          70% {
+          44% {
             opacity: 0;
+          }
+          45%,
+          70% {
+            opacity: 1;
           }
           71%,
           100% {
-            opacity: 1;
+            opacity: 0;
           }
         }
 
@@ -707,13 +786,22 @@ export async function MarketingPage() {
           animation: checkmark 500ms cubic-bezier(0.16, 1, 0.3, 1) 900ms both;
         }
 
-        .animate-note-character {
-          opacity: 0;
-          animation: note-character 11500ms linear var(--char-delay) infinite;
+        .preview-notes-typing {
+          min-height: 250px;
         }
 
-        .animate-caret {
-          animation: caret 900ms steps(1) 800ms infinite;
+        .preview-note-bottom-cursor {
+          display: inline-block;
+          width: 1px;
+          height: 13px;
+          margin-left: 1px;
+          vertical-align: -2px;
+          background: currentColor;
+          opacity: 0;
+        }
+
+        .preview-note-bottom-cursor-active {
+          animation: note-bottom-cursor 900ms steps(1) infinite;
         }
 
         .animate-progress-number {
@@ -748,6 +836,11 @@ export async function MarketingPage() {
             animation-delay: 0ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
+          }
+
+          .preview-note-bottom-cursor {
+            opacity: 1 !important;
+            animation: none !important;
           }
         }
       `}</style>
