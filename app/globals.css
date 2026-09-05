@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-stone-50 text-stone-950 antialiased dark:bg-stone-950 dark:text-stone-100;
+}
+
+* {
+  @apply border-stone-200 dark:border-stone-800;
+}
+
+::selection {
+  @apply bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-950;
+}
+
+.safe-bottom {
+  padding-bottom: max(7rem, calc(env(safe-area-inset-bottom) + 6rem));
+}
