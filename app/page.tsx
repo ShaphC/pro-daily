@@ -1,8 +1,5 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { MarketingPage } from "@/components/marketing/marketing-page";
 
-export default async function HomePage() {
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getClaims()
-  redirect(data?.claims?.sub ? '/today' : '/login')
+export default function HomePage() {
+  return <MarketingPage />;
 }
