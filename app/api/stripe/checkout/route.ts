@@ -4,6 +4,10 @@ import { STRIPE_PRICES } from "@/lib/stripe/config";
 import { STRIPE_TRIAL_DAYS, type StripePlan } from "@/lib/stripe/plans";
 import { createClient } from "@/lib/supabase/server";
 
+function isStripePlan(value: unknown): value is StripePlan {
+  return value === "monthly" || value === "yearly";
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -16,16 +20,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const plan = body.plan as StripePlan;
+    const body: unknown = await request.json();
 
-    if (plan !== "monthly" && plan !== "yearly") {
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("plan" in body) ||
+      !isStripePlan(body.plan)
+    ) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
+    const plan = body.plan;
+
     const { data: settings, error: settingsError } = await supabase
       .from("pro_user_settings")
-      .select("stripe_customer_id, subscription_id, subscription_status")
+      .select(
+        "stripe_customer_id, subscription_id, subscription_status, billing_access_override",
+      )
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -35,6 +47,32 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Unable to load account settings" },
         { status: 500 },
+      );
+    }
+
+    // Complimentary/beta users with an access override
+    // should never need to create a Stripe subscription.
+    if (settings?.billing_access_override) {
+      return NextResponse.json(
+        {
+          error: "Your account already has Pro access.",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Prevent creating a second subscription.
+    const existingSubscription =
+      settings?.subscription_status === "active" ||
+      settings?.subscription_status === "trialing" ||
+      settings?.subscription_status === "past_due";
+
+    if (existingSubscription) {
+      return NextResponse.json(
+        {
+          error: "You already have a subscription.",
+        },
+        { status: 400 },
       );
     }
 
@@ -70,18 +108,6 @@ export async function POST(request: Request) {
           { status: 500 },
         );
       }
-    }
-
-    const existingSubscription =
-      settings?.subscription_status === "active" ||
-      settings?.subscription_status === "trialing" ||
-      settings?.subscription_status === "past_due";
-
-    if (existingSubscription) {
-      return NextResponse.json(
-        { error: "You already have a subscription." },
-        { status: 400 },
-      );
     }
 
     const origin = new URL(request.url).origin;
