@@ -789,9 +789,9 @@ export function MarketingPage() {
               className="group flex items-center gap-2 text-sm font-bold tracking-[-0.02em]"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-black text-[10px] font-bold text-white transition-transform duration-300 group-hover:rotate-3 group-hover:scale-105 dark:bg-white dark:text-black">
-                C
+                CMkr
               </span>
-              Checkmarkr
+              Chekmarkr
             </Link>
 
             <nav className="hidden items-center gap-7 text-xs sm:flex">
