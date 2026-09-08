@@ -6,7 +6,7 @@
 //   const params = await searchParams
 //   return (
 //     <section className="rounded-3xl border bg-white p-7 shadow-sm dark:bg-stone-900">
-//       <p className="mb-8 text-sm font-semibold uppercase tracking-[0.22em] text-stone-500">Pro Daily</p>
+//       <p className="mb-8 text-sm font-semibold uppercase tracking-[0.22em] text-stone-500">Checkmarkr</p>
 //       <h1 className="text-3xl font-semibold tracking-tight">Create your daily page.</h1>
 //       <p className="mt-2 text-stone-500">Priorities first. Tasks next. Notes as you work.</p>
 //       {params.error && <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">{params.error}</p>}
@@ -32,7 +32,7 @@ export default function SignupPage() {
           </div>
 
           <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-black/45 dark:text-white/40">
-            Pro Daily
+            Checkmarkr
           </p>
 
           <h1 className="text-3xl font-bold tracking-[-0.04em]">
@@ -40,7 +40,7 @@ export default function SignupPage() {
           </h1>
 
           <p className="mt-3 text-sm font-medium leading-6 text-black/55 dark:text-white/45">
-            Pro Daily is currently being tested with a small group of users.
+            Checkmarkr is currently being tested with a small group of users.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ export default function SignupPage() {
           href="/"
           className="mt-3 flex min-h-11 w-full items-center justify-center rounded-full border border-black/10 px-4 py-3 text-sm font-bold text-black/60 transition hover:border-black/20 hover:text-black dark:border-white/10 dark:text-white/50 dark:hover:border-white/20 dark:hover:text-white"
         >
-          Back to Pro Daily
+          Back to Checkmarkr
         </Link>
 
         <p className="mt-7 text-center font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/25 dark:text-white/20">

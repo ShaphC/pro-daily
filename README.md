@@ -1,4 +1,4 @@
-# Pro Daily
+# Checkmarkr
 
 A focused daily work page built around **Priorities → Tasks → Notes → Next Day**.
 

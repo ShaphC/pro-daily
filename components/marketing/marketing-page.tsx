@@ -789,9 +789,9 @@ export function MarketingPage() {
               className="group flex items-center gap-2 text-sm font-bold tracking-[-0.02em]"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-black text-[10px] font-bold text-white transition-transform duration-300 group-hover:rotate-3 group-hover:scale-105 dark:bg-white dark:text-black">
-                P
+                C
               </span>
-              Pro Daily
+              Checkmarkr
             </Link>
 
             <nav className="hidden items-center gap-7 text-xs sm:flex">
@@ -880,7 +880,7 @@ export function MarketingPage() {
                 </h1>
 
                 <p className="mt-7 max-w-xl animate-preview-section text-base font-medium leading-7 text-black/65 [animation-delay:260ms] dark:text-white/55 sm:text-lg">
-                  Pro Daily turns your daily paper workflow into a focused
+                  Checkmarkr turns your daily paper workflow into a focused
                   digital workspace for priorities, tasks, notes, and the work
                   you actually want to remember.
                 </p>
@@ -1146,7 +1146,7 @@ export function MarketingPage() {
 
                 <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-black/60 dark:text-white/50">
                   Yesterday shouldn't disappear just because the calendar moved
-                  forward. Pro Daily keeps each day as its own record while
+                  forward. Checkmarkr keeps each day as its own record while
                   carrying unfinished work into the next one.
                 </p>
 
@@ -1219,7 +1219,7 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Pro Daily is still being shaped around real usage. Start with
+                Checkmarkr is still being shaped around real usage. Start with
                 the core daily workflow while the rest of the product develops.
               </p>
             </div>
@@ -1340,7 +1340,7 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Once people start using Pro Daily, this is where their
+                Once people start using Checkmarkr, this is where their
                 experiences will live.
               </p>
             </div>
@@ -1353,7 +1353,7 @@ export function MarketingPage() {
                 },
                 {
                   label: "Your second testimonial",
-                  prompt: "What did they stop doing because of Pro Daily?",
+                  prompt: "What did they stop doing because of Checkmarkr?",
                 },
                 {
                   label: "Your third testimonial",
@@ -1424,7 +1424,7 @@ export function MarketingPage() {
                 P
               </span>
 
-              <span className="text-xs font-bold">Pro Daily</span>
+              <span className="text-xs font-bold">Checkmarkr</span>
             </div>
 
             <div className="flex items-center gap-5 text-[10px] font-bold text-black/50 dark:text-white/40">

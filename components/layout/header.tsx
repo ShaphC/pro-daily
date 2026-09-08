@@ -6,7 +6,7 @@ export function Header({ dateLabel }: { dateLabel?: string }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
         <div>
           <div className="text-sm font-semibold uppercase tracking-[0.2em]">
-            Pro Daily
+            Checkmarkr
           </div>
           {/* {dateLabel && <div className="mt-0.5 text-xs text-stone-500">{dateLabel}</div>} */}
         </div>
