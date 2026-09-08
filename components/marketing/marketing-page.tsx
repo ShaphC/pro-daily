@@ -35,68 +35,68 @@ function ProductPreview() {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-5xl animate-preview-enter">
+    <div className="relative mx-auto w-full max-w-[760px] animate-preview-enter">
       <div className="absolute -inset-5 rounded-[2rem] bg-black/[0.035] blur-3xl dark:bg-white/[0.025]" />
 
       <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-[#f7f6f2] shadow-2xl shadow-black/10 transition-shadow duration-700 hover:shadow-black/15 dark:border-white/10 dark:bg-[#0c0c0b] dark:shadow-black/40 dark:hover:shadow-black/60">
-        <div className="mx-auto max-w-6xl px-5 py-7 sm:px-7 sm:py-9">
-          <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between animate-preview-header">
+        <div className="px-4 py-5 sm:px-5 sm:py-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between animate-preview-header">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/40">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/40">
                 Wednesday, September 9, 2026
               </p>
 
-              <h3 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-black dark:text-white sm:text-3xl">
+              <h3 className="mt-1.5 text-xl font-bold tracking-[-0.04em] text-black dark:text-white sm:text-2xl">
                 What matters today?
               </h3>
             </div>
 
-            <div className="w-fit rounded-full border border-black/10 px-3 py-1.5 text-[10px] font-bold text-black/55 dark:border-white/10 dark:text-white/50">
+            <div className="w-fit rounded-full border border-black/10 px-2.5 py-1.5 text-[9px] font-bold text-black/55 dark:border-white/10 dark:text-white/50">
               <span className="inline-block animate-progress-number">
                 2/3 top priorities complete
               </span>
             </div>
           </div>
 
-          <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_minmax(210px,.72fr)]">
-            <div className="space-y-7">
+          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(175px,.7fr)]">
+            <div className="space-y-5">
               <div className="animate-preview-section [animation-delay:180ms]">
-                <div className="mb-3 flex items-end justify-between gap-3">
+                <div className="mb-2.5 flex items-end justify-between gap-3">
                   <div>
-                    <h4 className="text-sm font-bold text-black dark:text-white">
+                    <h4 className="text-xs font-bold text-black dark:text-white">
                       Top Priorities
                     </h4>
 
-                    <p className="mt-1 text-[9px] font-medium text-black/45 dark:text-white/40">
+                    <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
                       Aim for 3–5. Maximum 7. Drag to change priority order.
                     </p>
                   </div>
 
-                  <span className="text-[9px] font-bold text-black/35 dark:text-white/30">
+                  <span className="text-[8px] font-bold text-black/35 dark:text-white/30">
                     4/7
                   </span>
                 </div>
 
                 <PriorityReorderPreview priorities={priorities} />
 
-                <div className="mt-2 flex gap-1.5 animate-preview-control [animation-delay:900ms]">
-                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[10px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
+                <div className="mt-1.5 flex gap-1.5 animate-preview-control [animation-delay:900ms]">
+                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-2 text-[9px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
                     Add a priority
                   </div>
 
-                  <div className="flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
-                    <Plus className="h-3.5 w-3.5 text-black/40 dark:text-white/35" />
+                  <div className="flex h-[31px] w-[31px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
+                    <Plus className="h-3 w-3 text-black/40 dark:text-white/35" />
                   </div>
                 </div>
               </div>
 
               <div className="animate-preview-section [animation-delay:350ms]">
-                <div className="mb-3">
-                  <h4 className="text-sm font-bold text-black dark:text-white">
+                <div className="mb-2.5">
+                  <h4 className="text-xs font-bold text-black dark:text-white">
                     Tasks
                   </h4>
 
-                  <p className="mt-1 text-[9px] font-medium text-black/45 dark:text-white/40">
+                  <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
                     Work through the details. Incomplete tasks continue forward.
                   </p>
                 </div>
@@ -112,34 +112,34 @@ function ProductPreview() {
                   ))}
                 </div>
 
-                <div className="mt-2 flex gap-1.5 animate-preview-control [animation-delay:1100ms]">
-                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[10px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
+                <div className="mt-1.5 flex gap-1.5 animate-preview-control [animation-delay:1100ms]">
+                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-2 text-[9px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
                     Add a task
                   </div>
 
-                  <div className="flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
-                    <Plus className="h-3.5 w-3.5 text-black/40 dark:text-white/35" />
+                  <div className="flex h-[31px] w-[31px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
+                    <Plus className="h-3 w-3 text-black/40 dark:text-white/35" />
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="animate-preview-notes [animation-delay:500ms]">
-              <div className="mb-3">
-                <h4 className="text-sm font-bold text-black dark:text-white">
+              <div className="mb-2.5">
+                <h4 className="text-xs font-bold text-black dark:text-white">
                   Notes
                 </h4>
 
-                <p className="mt-1 text-[9px] font-medium text-black/45 dark:text-white/40">
+                <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
                   Capture what happened while you worked.
                 </p>
               </div>
 
-              <div className="min-h-[300px] overflow-hidden rounded-xl border border-black/10 bg-stone-100/70 p-4 dark:border-white/10 dark:bg-stone-900/60 md:min-h-[395px]">
+              <div className="min-h-[250px] overflow-hidden rounded-xl border border-black/10 bg-stone-100/70 p-3.5 dark:border-white/10 dark:bg-stone-900/60 md:min-h-[310px]">
                 <PreviewTypingNotes />
               </div>
 
-              <p className="mt-1.5 text-right text-[8px] font-medium text-black/30 dark:text-white/25">
+              <p className="mt-1 text-right text-[7px] font-medium text-black/30 dark:text-white/25">
                 Saved when you leave the notes field.
               </p>
             </div>
@@ -159,7 +159,7 @@ function PriorityReorderPreview({
   }[];
 }) {
   return (
-    <div className="relative h-[174px]">
+    <div className="relative h-[150px]">
       <div className="absolute inset-0 grid gap-1.5">
         {priorities.map((priority, index) => (
           <div
@@ -201,7 +201,7 @@ function PriorityReorderPreview({
         )}
       </div>
 
-      <div className="pointer-events-none absolute right-1 top-[45px] animate-drag-indicator">
+      <div className="pointer-events-none absolute right-1 top-[39px] animate-drag-indicator">
         <div className="rounded-md border border-black/10 bg-white px-2 py-1 shadow-lg dark:border-white/10 dark:bg-stone-950">
           <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-black/45 dark:text-white/40">
             dragging
@@ -227,7 +227,7 @@ function PreviewDailyRow({
 }) {
   return (
     <div
-      className={`group flex h-[39px] items-center gap-2 rounded-lg border px-2.5 py-2 transition-all duration-300 hover:-translate-y-px hover:shadow-sm ${
+      className={`group flex h-[34px] items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-all duration-300 hover:-translate-y-px hover:shadow-sm ${
         emphasis
           ? "border-black/10 bg-white dark:border-white/10 dark:bg-stone-950"
           : "border-black/6 bg-white/50 dark:border-white/6 dark:bg-white/[0.015]"
@@ -239,25 +239,25 @@ function PreviewDailyRow({
       }
     >
       <div
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-500 ${
+        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-500 ${
           completed
             ? "animate-checkbox-check border-black bg-black text-white shadow-sm dark:border-white dark:bg-white dark:text-black"
             : "border-black/15 dark:border-white/15"
         }`}
       >
         {completed && (
-          <Check className="h-2.5 w-2.5 animate-checkmark" strokeWidth={2.5} />
+          <Check className="h-2 w-2 animate-checkmark" strokeWidth={2.5} />
         )}
       </div>
 
       {typeof rank === "number" && (
-        <span className="w-3 shrink-0 font-mono text-[8px] font-bold text-black/25 dark:text-white/20">
+        <span className="w-2.5 shrink-0 font-mono text-[7px] font-bold text-black/25 dark:text-white/20">
           {rank + 1}
         </span>
       )}
 
       <span
-        className={`min-w-0 truncate text-[10px] transition-all duration-500 ${
+        className={`min-w-0 truncate text-[8px] transition-all duration-500 ${
           completed
             ? "text-black/35 line-through dark:text-white/30"
             : emphasis
@@ -268,7 +268,7 @@ function PreviewDailyRow({
         {text}
       </span>
 
-      <div className="ml-auto h-3 w-3 shrink-0 rounded-sm border border-black/8 transition-transform duration-300 group-hover:scale-110 dark:border-white/8" />
+      <div className="ml-auto h-2.5 w-2.5 shrink-0 rounded-sm border border-black/8 transition-transform duration-300 group-hover:scale-110 dark:border-white/8" />
     </div>
   );
 }
@@ -363,86 +363,22 @@ function PreviewTypingNotes() {
 
   return (
     <div
-      className="preview-notes-typing text-[10px] font-medium leading-5 text-black/55 dark:text-white/45"
+      className="preview-notes-typing text-[9px] font-medium leading-[1.65] text-black/55 dark:text-white/45"
       aria-hidden="true"
     >
       {paragraphs.map((paragraph, paragraphIndex) => (
-        <p key={paragraph} className="mb-3 last:mb-0">
+        <p key={paragraph} className="mb-2.5 last:mb-0">
           {paragraph.slice(0, visibleLengths[paragraphIndex])}
         </p>
       ))}
 
-      <div className="mt-3 h-4">
+      <div className="mt-2 h-3">
         <span
           className={`preview-note-bottom-cursor ${
             finished ? "preview-note-bottom-cursor-active" : ""
           }`}
         />
       </div>
-    </div>
-  );
-}
-
-function PreviewSection({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <div className="mb-3 flex items-center justify-between border-b border-black/8 pb-2 dark:border-white/8">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
-            {title}
-          </span>
-
-          {count && (
-            <span className="font-mono text-[9px] font-bold text-black/35 dark:text-white/35">
-              {count}
-            </span>
-          )}
-        </div>
-
-        <Plus className="h-3 w-3 text-black/35 dark:text-white/35" />
-      </div>
-
-      <div className="space-y-2">{children}</div>
-    </section>
-  );
-}
-
-function PreviewRow({
-  text,
-  checked = false,
-}: {
-  text: string;
-  checked?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg px-2 py-1.5">
-      <div
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border ${
-          checked
-            ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-            : "border-black/20 dark:border-white/20"
-        }`}
-      >
-        {checked && <Check className="h-2.5 w-2.5" />}
-      </div>
-
-      <span
-        className={`text-xs ${
-          checked
-            ? "text-black/40 line-through dark:text-white/35"
-            : "font-medium text-black/70 dark:text-white/65"
-        }`}
-      >
-        {text}
-      </span>
     </div>
   );
 }
@@ -564,11 +500,11 @@ export function MarketingPage() {
             transform: translateY(3px);
           }
           38% {
-            transform: translateY(43px);
+            transform: translateY(38px);
           }
           52%,
           76% {
-            transform: translateY(43px);
+            transform: translateY(38px);
           }
           84% {
             transform: translateY(0);
@@ -587,11 +523,11 @@ export function MarketingPage() {
             transform: translateY(-3px);
           }
           38% {
-            transform: translateY(-43px);
+            transform: translateY(-38px);
           }
           52%,
           76% {
-            transform: translateY(-43px);
+            transform: translateY(-38px);
           }
           84% {
             transform: translateY(0);
@@ -629,12 +565,12 @@ export function MarketingPage() {
           }
           44% {
             opacity: 1;
-            transform: translate(-2px, 43px) scale(1.02);
+            transform: translate(-2px, 38px) scale(1.02);
           }
           52%,
           70% {
             opacity: 0;
-            transform: translate(-2px, 43px) scale(0.95);
+            transform: translate(-2px, 38px) scale(0.95);
           }
           100% {
             opacity: 0;
@@ -787,13 +723,13 @@ export function MarketingPage() {
         }
 
         .preview-notes-typing {
-          min-height: 250px;
+          min-height: 210px;
         }
 
         .preview-note-bottom-cursor {
           display: inline-block;
           width: 1px;
-          height: 13px;
+          height: 11px;
           margin-left: 1px;
           vertical-align: -2px;
           background: currentColor;
@@ -925,57 +861,80 @@ export function MarketingPage() {
         </header>
 
         <section className="relative">
-          <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-black/[0.025] blur-3xl dark:bg-white/[0.025]" />
+          <div className="absolute left-1/2 top-0 h-[650px] w-[1000px] -translate-x-1/2 rounded-full bg-black/[0.025] blur-3xl dark:bg-white/[0.025]" />
 
-          <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-20 sm:px-8 sm:pb-32 sm:pt-28">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-7 inline-flex animate-preview-header items-center gap-2 rounded-full border border-black/10 bg-white/50 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/55 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black dark:bg-white" />
-                A better daily work page
+          <div className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 sm:px-8 sm:pb-28 sm:pt-24 lg:pt-28">
+            <div className="grid items-center gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12 xl:gap-16">
+              <div className="max-w-xl lg:pl-4">
+                <div className="mb-7 inline-flex animate-preview-header items-center gap-2 rounded-full border border-black/10 bg-white/50 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/55 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black dark:bg-white" />
+                  A better daily work page
+                </div>
+
+                <h1 className="animate-preview-header text-[3.25rem] font-bold leading-[0.95] tracking-[-0.06em] [animation-delay:120ms] sm:text-6xl lg:text-[4.5rem] xl:text-[5.1rem]">
+                  Plan today.
+                  <br />
+                  <span className="text-black/40 dark:text-white/35">
+                    Remember tomorrow.
+                  </span>
+                </h1>
+
+                <p className="mt-7 max-w-xl animate-preview-section text-base font-medium leading-7 text-black/65 [animation-delay:260ms] dark:text-white/55 sm:text-lg">
+                  Pro Daily turns your daily paper workflow into a focused
+                  digital workspace for priorities, tasks, notes, and the work
+                  you actually want to remember.
+                </p>
+
+                <div className="mt-9 flex animate-preview-section flex-col items-start gap-3 [animation-delay:380ms] sm:flex-row sm:items-center">
+                  <Link
+                    href={ctaHref}
+                    className="group flex w-full items-center justify-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black sm:w-auto"
+                  >
+                    {ctaLabel}
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+
+                  <a
+                    href="#how-it-works"
+                    className="group flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-6 py-3.5 text-sm font-bold text-black/70 transition duration-300 hover:-translate-y-0.5 hover:border-black/30 hover:text-black dark:border-white/15 dark:text-white/70 dark:hover:border-white/30 dark:hover:text-white sm:w-auto"
+                  >
+                    See how it works
+                    <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </a>
+                </div>
+
+                <div className="mt-5 flex animate-preview-section items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-black/35 [animation-delay:500ms] dark:text-white/30">
+                  <Check className="h-3 w-3" />
+                  No complicated setup. Just start your day.
+                </div>
               </div>
 
-              <h1 className="animate-preview-header text-[3.2rem] font-bold leading-[0.98] tracking-[-0.055em] [animation-delay:120ms] sm:text-6xl md:text-7xl">
-                Plan today.
-                <br />
-                <span className="text-black/40 dark:text-white/35">
-                  Remember tomorrow.
-                </span>
-              </h1>
+              <div className="relative lg:-mr-8 xl:-mr-12">
+                <div className="absolute -inset-8 rounded-[3rem] bg-black/[0.025] blur-3xl dark:bg-white/[0.02]" />
 
-              <p className="mx-auto mt-7 max-w-2xl animate-preview-section text-base font-medium leading-7 text-black/65 [animation-delay:260ms] dark:text-white/55 sm:text-lg">
-                Pro Daily turns your daily paper workflow into a focused digital
-                workspace for priorities, tasks, notes, and the work you
-                actually want to remember.
-              </p>
-
-              <div className="mt-9 flex animate-preview-section flex-col items-center justify-center gap-3 [animation-delay:380ms] sm:flex-row">
-                <Link
-                  href={ctaHref}
-                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black sm:w-auto"
-                >
-                  {ctaLabel}
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-
-                <a
-                  href="#how-it-works"
-                  className="group flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-6 py-3.5 text-sm font-bold text-black/70 transition duration-300 hover:-translate-y-0.5 hover:border-black/30 hover:text-black dark:border-white/15 dark:text-white/70 dark:hover:border-white/30 dark:hover:text-white sm:w-auto"
-                >
-                  See how it works
-                  <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </a>
+                <div className="relative">
+                  <ProductPreview />
+                </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div className="mt-16 sm:mt-20">
-              <ProductPreview />
-            </div>
+        <section className="border-y border-black/10 dark:border-white/10">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-5 py-5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-black/40 dark:text-white/30 sm:gap-x-6">
+            <span>Choose what matters</span>
+            <span>•</span>
+            <span>Work through it</span>
+            <span>•</span>
+            <span>Leave a record</span>
+            <span>•</span>
+            <span>Continue tomorrow</span>
           </div>
         </section>
 
         <section
           id="how-it-works"
-          className="border-y border-black/10 dark:border-white/10"
+          className="border-b border-black/10 dark:border-white/10"
         >
           <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.7fr_1.3fr] md:py-28">
             <div>
@@ -1221,13 +1180,10 @@ export function MarketingPage() {
                       ["Sep 3", "2 / 3", "2 priorities carried"],
                       ["Sep 2", "3 / 3", "Day accomplished"],
                       ["Sep 1", "1 / 3", "2 priorities carried"],
-                    ].map(([date, progress, status], index) => (
+                    ].map(([date, progress, status]) => (
                       <div
                         key={date}
                         className="group flex items-center justify-between rounded-lg border border-black/6 px-4 py-3 transition-all duration-300 hover:-translate-y-px hover:border-black/15 hover:bg-black/[0.02] dark:border-white/6 dark:hover:border-white/15 dark:hover:bg-white/[0.02]"
-                        style={{
-                          animationDelay: `${index * 100}ms`,
-                        }}
                       >
                         <div>
                           <p className="text-xs font-bold">{date}</p>
