@@ -10,14 +10,90 @@ import {
   History,
   Menu,
   Minus,
+  Moon,
   MoveRight,
   Plus,
   Sparkles,
+  Sun,
   Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+
+function Logo() {
+  return (
+    <span className="group flex items-center gap-2 text-sm font-bold tracking-[-0.02em]">
+      <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-black text-[9px] font-bold tracking-[-0.04em] text-white shadow-sm transition duration-300 group-hover:rotate-3 group-hover:scale-105 dark:border-white/10 dark:bg-white dark:text-black">
+        <span className="absolute inset-0 bg-white/10 dark:bg-black/10" />
+        <span className="relative">CMkr</span>
+      </span>
+      <span>Checkmarkr</span>
+    </span>
+  );
+}
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem("checkmarkr-theme");
+
+    if (storedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+      setIsDark(true);
+    } else if (storedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+      setIsDark(false);
+    } else {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+
+      document.documentElement.classList.toggle("dark", prefersDark);
+      document.documentElement.style.colorScheme = prefersDark
+        ? "dark"
+        : "light";
+      setIsDark(prefersDark);
+    }
+
+    setReady(true);
+  }, []);
+
+  function toggleTheme() {
+    const nextIsDark = !isDark;
+
+    document.documentElement.classList.toggle("dark", nextIsDark);
+    document.documentElement.style.colorScheme = nextIsDark ? "dark" : "light";
+
+    window.localStorage.setItem(
+      "checkmarkr-theme",
+      nextIsDark ? "dark" : "light",
+    );
+
+    setIsDark(nextIsDark);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      disabled={!ready}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="glass flex h-10 w-10 items-center justify-center rounded-full text-black/60 transition duration-300 hover:-translate-y-0.5 hover:text-black dark:text-white/60 dark:hover:text-white"
+    >
+      {isDark ? (
+        <Sun className="h-4 w-4" strokeWidth={1.8} />
+      ) : (
+        <Moon className="h-4 w-4" strokeWidth={1.8} />
+      )}
+    </button>
+  );
+}
 
 function ProductPreview() {
   const priorities = [
@@ -36,9 +112,13 @@ function ProductPreview() {
 
   return (
     <div className="relative mx-auto w-full max-w-[760px] animate-preview-enter">
-      <div className="absolute -inset-5 rounded-[2rem] bg-black/[0.035] blur-3xl dark:bg-white/[0.025]" />
+      <div className="absolute -inset-10 rounded-[4rem] bg-black/[0.055] blur-3xl dark:bg-white/[0.035]" />
+      <div className="absolute left-1/4 top-1/4 h-40 w-40 rounded-full bg-black/[0.025] blur-[90px] dark:bg-white/[0.025]" />
 
-      <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-[#f7f6f2] shadow-2xl shadow-black/10 transition-shadow duration-700 hover:shadow-black/15 dark:border-white/10 dark:bg-[#0c0c0b] dark:shadow-black/40 dark:hover:shadow-black/60">
+      <div className="glass-strong relative overflow-hidden rounded-[1.75rem]">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/20 to-transparent dark:via-white/20" />
+        <div className="absolute inset-x-8 top-0 h-px bg-white/80 blur-sm dark:bg-white/20" />
+
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between animate-preview-header">
             <div>
@@ -51,7 +131,7 @@ function ProductPreview() {
               </h3>
             </div>
 
-            <div className="w-fit rounded-full border border-black/10 px-2.5 py-1.5 text-[9px] font-bold text-black/55 dark:border-white/10 dark:text-white/50">
+            <div className="glass-subtle w-fit rounded-full px-2.5 py-1.5 text-[9px] font-bold text-black/55 dark:text-white/50">
               <span className="inline-block animate-progress-number">
                 2/3 top priorities complete
               </span>
@@ -80,11 +160,11 @@ function ProductPreview() {
                 <PriorityReorderPreview priorities={priorities} />
 
                 <div className="mt-1.5 flex gap-1.5 animate-preview-control [animation-delay:900ms]">
-                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-2 text-[9px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
+                  <div className="glass-subtle min-w-0 flex-1 rounded-lg px-2.5 py-2 text-[9px] font-medium text-black/35 dark:text-white/30">
                     Add a priority
                   </div>
 
-                  <div className="flex h-[31px] w-[31px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
+                  <div className="glass-subtle flex h-[31px] w-[31px] items-center justify-center rounded-lg transition-transform duration-300 hover:scale-105">
                     <Plus className="h-3 w-3 text-black/40 dark:text-white/35" />
                   </div>
                 </div>
@@ -97,7 +177,8 @@ function ProductPreview() {
                   </h4>
 
                   <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
-                    Work through the details. Incomplete tasks continue forward.
+                    Work through the details. Choose what carries into each new
+                    day.
                   </p>
                 </div>
 
@@ -113,11 +194,11 @@ function ProductPreview() {
                 </div>
 
                 <div className="mt-1.5 flex gap-1.5 animate-preview-control [animation-delay:1100ms]">
-                  <div className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-2 text-[9px] font-medium text-black/35 dark:border-white/10 dark:bg-stone-950 dark:text-white/30">
+                  <div className="glass-subtle min-w-0 flex-1 rounded-lg px-2.5 py-2 text-[9px] font-medium text-black/35 dark:text-white/30">
                     Add a task
                   </div>
 
-                  <div className="flex h-[31px] w-[31px] items-center justify-center rounded-lg border border-black/10 bg-white transition-transform duration-300 hover:scale-105 dark:border-white/10 dark:bg-stone-950">
+                  <div className="glass-subtle flex h-[31px] w-[31px] items-center justify-center rounded-lg transition-transform duration-300 hover:scale-105">
                     <Plus className="h-3 w-3 text-black/40 dark:text-white/35" />
                   </div>
                 </div>
@@ -135,7 +216,7 @@ function ProductPreview() {
                 </p>
               </div>
 
-              <div className="min-h-[250px] overflow-hidden rounded-xl border border-black/10 bg-stone-100/70 p-3.5 dark:border-white/10 dark:bg-stone-900/60 md:min-h-[310px]">
+              <div className="glass-subtle min-h-[250px] overflow-hidden rounded-xl p-3.5 md:min-h-[310px]">
                 <PreviewTypingNotes />
               </div>
 
@@ -202,7 +283,7 @@ function PriorityReorderPreview({
       </div>
 
       <div className="pointer-events-none absolute right-1 top-[39px] animate-drag-indicator">
-        <div className="rounded-md border border-black/10 bg-white px-2 py-1 shadow-lg dark:border-white/10 dark:bg-stone-950">
+        <div className="glass-strong rounded-md px-2 py-1">
           <span className="font-mono text-[7px] font-bold uppercase tracking-[0.12em] text-black/45 dark:text-white/40">
             dragging
           </span>
@@ -227,10 +308,8 @@ function PreviewDailyRow({
 }) {
   return (
     <div
-      className={`group flex h-[34px] items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-all duration-300 hover:-translate-y-px hover:shadow-sm ${
-        emphasis
-          ? "border-black/10 bg-white dark:border-white/10 dark:bg-stone-950"
-          : "border-black/6 bg-white/50 dark:border-white/6 dark:bg-white/[0.015]"
+      className={`glass-subtle group flex h-[34px] items-center gap-1.5 rounded-lg px-2 py-1.5 transition-all duration-300 hover:-translate-y-px ${
+        emphasis ? "opacity-100" : "opacity-80"
       }`}
       style={
         {
@@ -781,77 +860,64 @@ export function MarketingPage() {
         }
       `}</style>
 
-      <main className="min-h-screen overflow-hidden bg-[#f7f6f2] text-[#111110] dark:bg-[#0c0c0b] dark:text-[#f4f3ef]">
-        <header className="relative z-20 border-b border-black/10 dark:border-white/10">
-          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-            <Link
-              href="/"
-              className="group flex items-center gap-2 text-sm font-bold tracking-[-0.02em]"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-black text-[10px] font-bold text-white transition-transform duration-300 group-hover:rotate-3 group-hover:scale-105 dark:bg-white dark:text-black">
-                CMkr
-              </span>
-              Chekmarkr
+      <main className="relative min-h-screen overflow-hidden bg-[#f3f2ed] text-[#111110] dark:bg-[#070707] dark:text-[#f4f3ef]">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <div className="absolute left-[-12%] top-[-10%] h-[520px] w-[520px] rounded-full bg-black/[0.055] blur-[140px] dark:bg-white/[0.045]" />
+          <div className="absolute right-[-10%] top-[16%] h-[620px] w-[620px] rounded-full bg-black/[0.04] blur-[150px] dark:bg-white/[0.035]" />
+          <div className="absolute bottom-[-12%] left-[20%] h-[560px] w-[560px] rounded-full bg-black/[0.035] blur-[150px] dark:bg-white/[0.025]" />
+          <div className="absolute left-[42%] top-[42%] h-[300px] w-[300px] rounded-full bg-black/[0.025] blur-[120px] dark:bg-white/[0.025]" />
+        </div>
+
+        <header className="glass-header fixed inset-x-0 top-0 z-50">
+          <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 sm:px-8">
+            <Link href="/" aria-label="Checkmarkr home">
+              <Logo />
             </Link>
 
-            <nav className="hidden items-center gap-7 text-xs sm:flex">
-              <a
-                href="#how-it-works"
-                className="font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white"
-              >
-                How it works
-              </a>
-
-              <a
-                href="#workflow"
-                className="font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white"
-              >
-                Workflow
-              </a>
-
-              <a
-                href="#pricing"
-                className="font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white"
-              >
-                Pricing
-              </a>
-
-              <a
-                href="#testimonials"
-                className="font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white"
-              >
-                Testimonials
-              </a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <Link
-                  href="/today"
-                  className="hidden font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white sm:block"
+            <div className="flex items-center gap-2">
+              <nav className="hidden items-center gap-1 rounded-full border border-black/8 bg-white/25 p-1 backdrop-blur-xl dark:border-white/8 dark:bg-white/[0.025] lg:flex">
+                <a
+                  href="#how-it-works"
+                  className="rounded-full px-3 py-2 text-xs font-bold text-black/60 transition hover:bg-white/50 hover:text-black dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white"
                 >
-                  Today
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="hidden font-bold text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white sm:block"
+                  How it works
+                </a>
+
+                <a
+                  href="#workflow"
+                  className="rounded-full px-3 py-2 text-xs font-bold text-black/60 transition hover:bg-white/50 hover:text-black dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white"
                 >
-                  Sign in
-                </Link>
-              )}
+                  Workflow
+                </a>
+
+                <a
+                  href="#pricing"
+                  className="rounded-full px-3 py-2 text-xs font-bold text-black/60 transition hover:bg-white/50 hover:text-black dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white"
+                >
+                  Pricing
+                </a>
+
+                <a
+                  href="#testimonials"
+                  className="rounded-full px-3 py-2 text-xs font-bold text-black/60 transition hover:bg-white/50 hover:text-black dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white"
+                >
+                  Testimonials
+                </a>
+              </nav>
 
               <Link
                 href={ctaHref}
-                className="group flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-xs font-bold text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black"
+                className="group flex items-center gap-2 rounded-full border border-black/10 bg-black px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-white dark:text-black dark:shadow-black/20"
               >
                 {ctaLabel}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
 
+              <ThemeToggle />
+
               <button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 transition hover:bg-black/[0.04] sm:hidden dark:border-white/15 dark:hover:bg-white/[0.04]"
+                className="glass flex h-10 w-10 items-center justify-center rounded-full lg:hidden"
                 aria-label="Open navigation"
               >
                 <Menu className="h-4 w-4" />
@@ -860,13 +926,13 @@ export function MarketingPage() {
           </div>
         </header>
 
-        <section className="relative">
-          <div className="absolute left-1/2 top-0 h-[650px] w-[1000px] -translate-x-1/2 rounded-full bg-black/[0.025] blur-3xl dark:bg-white/[0.025]" />
+        <section className="relative z-10 pt-[68px]">
+          <div className="absolute left-1/2 top-0 h-[650px] w-[1000px] -translate-x-1/2 rounded-full bg-black/[0.035] blur-[130px] dark:bg-white/[0.025]" />
 
           <div className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 sm:px-8 sm:pb-28 sm:pt-24 lg:pt-28">
             <div className="grid items-center gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12 xl:gap-16">
               <div className="max-w-xl lg:pl-4">
-                <div className="mb-7 inline-flex animate-preview-header items-center gap-2 rounded-full border border-black/10 bg-white/50 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/55 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50">
+                <div className="glass-subtle mb-7 inline-flex animate-preview-header items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/55 dark:text-white/50">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black dark:bg-white" />
                   A better daily work page
                 </div>
@@ -888,7 +954,7 @@ export function MarketingPage() {
                 <div className="mt-9 flex animate-preview-section flex-col items-start gap-3 [animation-delay:380ms] sm:flex-row sm:items-center">
                   <Link
                     href={ctaHref}
-                    className="group flex w-full items-center justify-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black sm:w-auto"
+                    className="group flex w-full items-center justify-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:bg-white dark:text-black dark:shadow-black/20 sm:w-auto"
                   >
                     {ctaLabel}
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -896,7 +962,7 @@ export function MarketingPage() {
 
                   <a
                     href="#how-it-works"
-                    className="group flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-6 py-3.5 text-sm font-bold text-black/70 transition duration-300 hover:-translate-y-0.5 hover:border-black/30 hover:text-black dark:border-white/15 dark:text-white/70 dark:hover:border-white/30 dark:hover:text-white sm:w-auto"
+                    className="glass flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold text-black/70 transition duration-300 hover:-translate-y-0.5 hover:text-black dark:text-white/70 dark:hover:text-white sm:w-auto"
                   >
                     See how it works
                     <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -910,8 +976,7 @@ export function MarketingPage() {
               </div>
 
               <div className="relative lg:-mr-8 xl:-mr-12">
-                <div className="absolute -inset-8 rounded-[3rem] bg-black/[0.025] blur-3xl dark:bg-white/[0.02]" />
-
+                <div className="absolute -inset-10 rounded-[4rem] bg-black/[0.045] blur-[100px] dark:bg-white/[0.025]" />
                 <div className="relative">
                   <ProductPreview />
                 </div>
@@ -920,7 +985,7 @@ export function MarketingPage() {
           </div>
         </section>
 
-        <section className="border-y border-black/10 dark:border-white/10">
+        <section className="glass-divider relative z-10 border-y">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-5 py-5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-black/40 dark:text-white/30 sm:gap-x-6">
             <span>Choose what matters</span>
             <span>•</span>
@@ -934,7 +999,7 @@ export function MarketingPage() {
 
         <section
           id="how-it-works"
-          className="border-b border-black/10 dark:border-white/10"
+          className="relative z-10 border-b border-black/8 dark:border-white/8"
         >
           <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.7fr_1.3fr] md:py-28">
             <div>
@@ -966,14 +1031,15 @@ export function MarketingPage() {
               </FeatureNumber>
 
               <FeatureNumber number="04" title="Come back tomorrow">
-                Incomplete work carries forward automatically, so you don't have
-                to rebuild your day from memory every morning.
+                When a new day begins, choose what unfinished work you want to
+                bring forward. Your history stays intact while your next day
+                starts exactly how you want it.
               </FeatureNumber>
             </div>
           </div>
         </section>
 
-        <section id="workflow">
+        <section id="workflow" className="relative z-10">
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
             <div className="max-w-2xl">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-black/45 dark:text-white/40">
@@ -991,8 +1057,8 @@ export function MarketingPage() {
               </p>
             </div>
 
-            <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-black/10 bg-black/10 dark:border-white/10 dark:bg-white/10 md:grid-cols-3">
-              <div className="group bg-[#f7f6f2] p-7 transition duration-500 hover:-translate-y-1 dark:bg-[#0c0c0b] sm:p-9">
+            <div className="glass-strong mt-14 grid overflow-hidden rounded-[1.75rem] p-px md:grid-cols-3">
+              <div className="glass group rounded-[1.7rem] p-7 transition duration-500 hover:-translate-y-1 sm:p-9 md:rounded-none md:rounded-l-[1.7rem]">
                 <Target
                   className="h-5 w-5 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
                   strokeWidth={1.5}
@@ -1012,7 +1078,7 @@ export function MarketingPage() {
                 </p>
               </div>
 
-              <div className="group bg-[#f7f6f2] p-7 transition duration-500 hover:-translate-y-1 dark:bg-[#0c0c0b] sm:p-9">
+              <div className="glass group rounded-[1.7rem] p-7 transition duration-500 hover:-translate-y-1 sm:p-9 md:rounded-none">
                 <CheckCircle2
                   className="h-5 w-5 transition-transform duration-500 group-hover:scale-110"
                   strokeWidth={1.5}
@@ -1032,7 +1098,7 @@ export function MarketingPage() {
                 </p>
               </div>
 
-              <div className="group bg-[#f7f6f2] p-7 transition duration-500 hover:-translate-y-1 dark:bg-[#0c0c0b] sm:p-9">
+              <div className="glass group rounded-[1.7rem] p-7 transition duration-500 hover:-translate-y-1 sm:p-9 md:rounded-none md:rounded-r-[1.7rem]">
                 <FileText
                   className="h-5 w-5 transition-transform duration-500 group-hover:scale-110"
                   strokeWidth={1.5}
@@ -1057,7 +1123,7 @@ export function MarketingPage() {
 
         <section
           id="why"
-          className="border-y border-black/10 dark:border-white/10"
+          className="relative z-10 border-y border-black/8 dark:border-white/8"
         >
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
             <div className="grid gap-12 md:grid-cols-[0.8fr_1.2fr]">
@@ -1072,71 +1138,61 @@ export function MarketingPage() {
               </div>
 
               <div className="space-y-0">
-                <div className="border-t border-black/10 py-7 transition-transform duration-500 hover:translate-x-1 dark:border-white/10">
-                  <div className="flex items-start gap-4">
-                    <Minus className="mt-1 h-4 w-4 shrink-0 text-black/40 dark:text-white/35" />
-                    <div>
-                      <h3 className="font-bold">No Kanban boards</h3>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                        You don't need to move cards between columns to know
-                        what you're doing today.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {[
+                  {
+                    icon: Minus,
+                    title: "No Kanban boards",
+                    text: "You don't need to move cards between columns to know what you're doing today.",
+                  },
+                  {
+                    icon: Minus,
+                    title: "No endless project setup",
+                    text: "Open the page and start working. The structure is already there.",
+                  },
+                  {
+                    icon: Minus,
+                    title: "No productivity theater",
+                    text: "The goal isn't to maintain a perfect system. It's to do meaningful work and remember what happened.",
+                  },
+                  {
+                    icon: Check,
+                    title: "A record you can return to",
+                    text: "Your days become a history of what you worked on, what you learned, and what you intentionally carried forward.",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
 
-                <div className="border-t border-black/10 py-7 transition-transform duration-500 hover:translate-x-1 dark:border-white/10">
-                  <div className="flex items-start gap-4">
-                    <Minus className="mt-1 h-4 w-4 shrink-0 text-black/40 dark:text-white/35" />
-                    <div>
-                      <h3 className="font-bold">No endless project setup</h3>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                        Open the page and start working. The structure is
-                        already there.
-                      </p>
+                  return (
+                    <div
+                      key={item.title}
+                      className="border-t border-black/10 py-7 transition-transform duration-500 hover:translate-x-1 dark:border-white/10"
+                    >
+                      <div className="flex items-start gap-4">
+                        <Icon className="mt-1 h-4 w-4 shrink-0 text-black/40 dark:text-white/35" />
+                        <div>
+                          <h3 className="font-bold">{item.title}</h3>
+                          <p className="mt-2 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
+                            {item.text}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-black/10 py-7 transition-transform duration-500 hover:translate-x-1 dark:border-white/10">
-                  <div className="flex items-start gap-4">
-                    <Minus className="mt-1 h-4 w-4 shrink-0 text-black/40 dark:text-white/35" />
-                    <div>
-                      <h3 className="font-bold">No productivity theater</h3>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                        The goal isn't to maintain a perfect system. It's to do
-                        meaningful work and remember what happened.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-black/10 py-7 transition-transform duration-500 hover:translate-x-1 dark:border-white/10">
-                  <div className="flex items-start gap-4">
-                    <Check className="mt-1 h-4 w-4 shrink-0" />
-                    <div>
-                      <h3 className="font-bold">A record you can return to</h3>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                        Your days become a history of what you worked on, what
-                        you learned, and what carried forward.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
         </section>
 
-        <section>
+        <section className="relative z-10">
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
             <div className="grid gap-12 md:grid-cols-2 md:items-center">
               <div>
-                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 transition-transform duration-500 hover:-rotate-3 hover:scale-105 dark:border-white/10">
+                <div className="glass flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-500 hover:-rotate-3 hover:scale-105">
                   <History className="h-4 w-4" strokeWidth={1.5} />
                 </div>
 
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-black/45 dark:text-white/40">
+                <p className="mt-5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-black/45 dark:text-white/40">
                   Your work has a memory
                 </p>
 
@@ -1145,9 +1201,9 @@ export function MarketingPage() {
                 </h2>
 
                 <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                  Previous tasks shouldn't disappear just because the calendar
-                  moved forward. Checkmarkr keeps each day as its own record
-                  while carrying unfinished work into the next one.
+                  Previous work stays attached to its original day. When you
+                  start a new day, you decide which incomplete priorities,
+                  tasks, or notes are worth bringing forward.
                 </p>
 
                 <Link
@@ -1162,7 +1218,9 @@ export function MarketingPage() {
               </div>
 
               <div className="relative">
-                <div className="rounded-2xl border border-black/10 bg-white/50 p-5 transition duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.04] dark:border-white/10 dark:bg-white/[0.03] dark:hover:shadow-black/20 sm:p-7">
+                <div className="absolute -inset-5 rounded-[2rem] bg-black/[0.035] blur-3xl dark:bg-white/[0.025]" />
+
+                <div className="glass-strong relative rounded-[1.5rem] p-5 transition duration-500 hover:-translate-y-1 sm:p-7">
                   <div className="flex items-center justify-between border-b border-black/8 pb-4 dark:border-white/8">
                     <div>
                       <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/40 dark:text-white/35">
@@ -1183,7 +1241,7 @@ export function MarketingPage() {
                     ].map(([date, progress, status]) => (
                       <div
                         key={date}
-                        className="group flex items-center justify-between rounded-lg border border-black/6 px-4 py-3 transition-all duration-300 hover:-translate-y-px hover:border-black/15 hover:bg-black/[0.02] dark:border-white/6 dark:hover:border-white/15 dark:hover:bg-white/[0.02]"
+                        className="glass-subtle group flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-300 hover:-translate-y-px"
                       >
                         <div>
                           <p className="text-xs font-bold">{date}</p>
@@ -1206,7 +1264,7 @@ export function MarketingPage() {
 
         <section
           id="pricing"
-          className="border-y border-black/10 dark:border-white/10"
+          className="relative z-10 border-y border-black/8 dark:border-white/8"
         >
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
             <div className="mx-auto max-w-2xl text-center">
@@ -1225,7 +1283,7 @@ export function MarketingPage() {
             </div>
 
             <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
-              <div className="rounded-2xl border border-black/10 bg-white/50 p-7 transition duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.04] dark:border-white/10 dark:bg-white/[0.03] sm:p-9">
+              <div className="glass-strong rounded-[1.5rem] p-7 transition duration-500 hover:-translate-y-1 sm:p-9">
                 <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-black/45 dark:text-white/40">
                   Start
                 </p>
@@ -1252,7 +1310,7 @@ export function MarketingPage() {
 
                     <div className="flex gap-3">
                       <Check className="h-4 w-4 shrink-0" />
-                      Automatic carry-forward
+                      Choose what carries forward
                     </div>
 
                     <div className="flex gap-3">
@@ -1264,15 +1322,17 @@ export function MarketingPage() {
 
                 <Link
                   href={ctaHref}
-                  className="mt-8 flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black"
+                  className="mt-8 flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-bold text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:bg-white dark:text-black dark:shadow-black/20"
                 >
                   {ctaLabel}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
 
-              <div className="relative overflow-hidden rounded-2xl border border-black/15 bg-black p-7 text-white shadow-xl shadow-black/10 dark:border-white/15 dark:bg-white dark:text-black dark:shadow-black/30 sm:p-9">
-                <div className="absolute right-5 top-5 rounded-full border border-white/15 px-2.5 py-1 font-mono text-[8px] font-bold uppercase tracking-[0.15em] text-white/55 dark:border-black/10 dark:text-black/45">
+              <div className="glass-dark-panel relative overflow-hidden rounded-[1.5rem] p-7 text-white shadow-2xl sm:p-9">
+                <div className="absolute inset-x-0 top-0 h-px bg-white/25 dark:bg-black/15" />
+
+                <div className="absolute right-5 top-5 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 font-mono text-[8px] font-bold uppercase tracking-[0.15em] text-white/55 backdrop-blur-xl dark:border-black/10 dark:bg-black/[0.04] dark:text-black/45">
                   Coming later
                 </div>
 
@@ -1321,10 +1381,10 @@ export function MarketingPage() {
           </div>
         </section>
 
-        <section id="testimonials">
+        <section id="testimonials" className="relative z-10">
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
             <div className="mx-auto max-w-2xl text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 dark:border-white/10">
+              <div className="glass mx-auto flex h-10 w-10 items-center justify-center rounded-xl">
                 <Sparkles
                   className="h-4 w-4 animate-float-soft"
                   strokeWidth={1.5}
@@ -1362,7 +1422,7 @@ export function MarketingPage() {
               ].map((testimonial, index) => (
                 <div
                   key={testimonial.label}
-                  className="group rounded-2xl border border-black/10 bg-white/40 p-7 transition duration-500 hover:-translate-y-1 hover:border-black/15 hover:shadow-xl hover:shadow-black/[0.04] dark:border-white/10 dark:bg-white/[0.025] dark:hover:border-white/15 dark:hover:shadow-black/20 sm:p-8"
+                  className="glass group rounded-[1.5rem] p-7 transition duration-500 hover:-translate-y-1 sm:p-8"
                 >
                   <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black/30 dark:text-white/25">
                     0{index + 1}
@@ -1385,9 +1445,9 @@ export function MarketingPage() {
           </div>
         </section>
 
-        <section className="border-y border-black/10 dark:border-white/10">
+        <section className="relative z-10 border-y border-black/8 dark:border-white/8">
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-            <div className="mx-auto max-w-2xl text-center">
+            <div className="glass-strong mx-auto max-w-3xl rounded-[2rem] px-6 py-12 text-center sm:px-12 sm:py-16">
               <Sparkles
                 className="mx-auto h-5 w-5 animate-float-soft"
                 strokeWidth={1.5}
@@ -1408,7 +1468,7 @@ export function MarketingPage() {
 
               <Link
                 href={ctaHref}
-                className="group mx-auto mt-8 flex w-fit items-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:text-black"
+                className="group mx-auto mt-8 flex w-fit items-center gap-2 rounded-full bg-black px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:bg-white dark:text-black dark:shadow-black/20"
               >
                 {ctaLabel}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -1417,24 +1477,13 @@ export function MarketingPage() {
           </div>
         </section>
 
-        <footer>
+        <footer className="relative z-10">
           <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-black text-[9px] font-bold text-white transition-transform duration-300 hover:rotate-3 dark:bg-white dark:text-black">
-                P
-              </span>
-
-              <span className="text-xs font-bold">Checkmarkr</span>
-            </div>
+            <Link href="/" aria-label="Checkmarkr home">
+              <Logo />
+            </Link>
 
             <div className="flex items-center gap-5 text-[10px] font-bold text-black/50 dark:text-white/40">
-              <Link
-                href="/login"
-                className="transition-colors hover:text-black dark:hover:text-white"
-              >
-                Sign in
-              </Link>
-
               <Link
                 href="/signup"
                 className="transition-colors hover:text-black dark:hover:text-white"
