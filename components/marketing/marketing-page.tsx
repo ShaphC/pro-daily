@@ -1145,9 +1145,9 @@ export function MarketingPage() {
                 </h2>
 
                 <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                  Yesterday shouldn't disappear just because the calendar moved
-                  forward. Checkmarkr keeps each day as its own record while
-                  carrying unfinished work into the next one.
+                  Previous tasks shouldn't disappear just because the calendar
+                  moved forward. Checkmarkr keeps each day as its own record
+                  while carrying unfinished work into the next one.
                 </p>
 
                 <Link
