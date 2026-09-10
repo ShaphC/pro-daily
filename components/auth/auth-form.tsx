@@ -1,31 +1,50 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useState } from "react";
 
-export function AuthFormFields({ buttonLabel }: { buttonLabel: string }) {
-  const [timezone, setTimezone] = useState('UTC')
-  const [origin, setOrigin] = useState('')
+type AuthFormFieldsProps = {
+  buttonLabel: string;
+};
 
-  useEffect(() => {
-    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')
-    setOrigin(window.location.origin)
-  }, [])
+export function AuthFormFields({ buttonLabel }: AuthFormFieldsProps) {
+  const [pending, setPending] = useState(false);
 
   return (
     <>
-      <input type="hidden" name="timezone" value={timezone} />
-      <input type="hidden" name="origin" value={origin} />
-      <label className="grid gap-2 text-sm font-medium">
+      <label className="sr-only" htmlFor="auth-email">
         Email
-        <input name="email" type="email" required autoComplete="email" className="rounded-xl border bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-stone-400 dark:bg-stone-900" />
       </label>
-      <label className="grid gap-2 text-sm font-medium">
+      <input
+        id="auth-email"
+        name="email"
+        type="email"
+        placeholder="Email"
+        autoComplete="email"
+        required
+        className="rounded-2xl border border-black/10 bg-white/35 px-4 py-3 text-stone-950 outline-none backdrop-blur-xl transition placeholder:text-stone-400 focus:border-black/20 focus:bg-white/50 focus:ring-2 focus:ring-black/5 dark:border-white/10 dark:bg-white/[0.045] dark:text-white dark:placeholder:text-stone-500 dark:focus:border-white/20 dark:focus:bg-white/[0.07] dark:focus:ring-white/5"
+      />
+
+      <label className="sr-only" htmlFor="auth-password">
         Password
-        <input name="password" type="password" required minLength={8} autoComplete="current-password" className="rounded-xl border bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-stone-400 dark:bg-stone-900" />
       </label>
-      <button className="rounded-xl bg-stone-950 px-4 py-3 font-medium text-white transition hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-950 dark:hover:bg-white">
-        {buttonLabel}
+      <input
+        id="auth-password"
+        name="password"
+        type="password"
+        placeholder="Password"
+        autoComplete="current-password"
+        required
+        className="rounded-2xl border border-black/10 bg-white/35 px-4 py-3 text-stone-950 outline-none backdrop-blur-xl transition placeholder:text-stone-400 focus:border-black/20 focus:bg-white/50 focus:ring-2 focus:ring-black/5 dark:border-white/10 dark:bg-white/[0.045] dark:text-white dark:placeholder:text-stone-500 dark:focus:border-white/20 dark:focus:bg-white/[0.07] dark:focus:ring-white/5"
+      />
+
+      <button
+        type="submit"
+        disabled={pending}
+        onClick={() => setPending(true)}
+        className="mt-2 rounded-2xl border border-black/10 bg-stone-950 px-4 py-3 font-medium text-white shadow-[0_12px_35px_rgba(0,0,0,0.14)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,0.18)] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white dark:text-stone-950"
+      >
+        {pending ? "Please wait..." : buttonLabel}
       </button>
     </>
-  )
+  );
 }
