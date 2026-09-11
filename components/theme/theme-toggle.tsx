@@ -12,12 +12,20 @@ type ThemeToggleProps = {
 };
 
 function getSystemTheme(): "light" | "dark" {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
 
 function applyTheme(theme: ThemeMode) {
+  if (typeof document === "undefined") {
+    return;
+  }
+
   const resolvedTheme = theme === "system" ? getSystemTheme() : theme;
 
   document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
@@ -79,6 +87,7 @@ export function ThemeToggle({
 
     setTheme(nextTheme);
     window.localStorage.setItem("checkmarkr-theme", nextTheme);
+
     applyTheme(nextTheme);
 
     if (authenticated) {
