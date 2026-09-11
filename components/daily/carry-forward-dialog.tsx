@@ -24,13 +24,9 @@ export function CarryForwardDialog({
   onComplete,
 }: CarryForwardDialogProps) {
   const [priorities, setPriorities] = useState(defaultPriorities);
-
   const [tasks, setTasks] = useState(defaultTasks);
-
   const [notes, setNotes] = useState(defaultNotes);
-
   const [pending, startTransition] = useTransition();
-
   const [error, setError] = useState("");
 
   const incompletePriorities = source.priorities.filter(
@@ -112,30 +108,32 @@ export function CarryForwardDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-md dark:bg-black/55">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="carry-forward-title"
-        className="w-full max-w-lg rounded-3xl border bg-white p-6 shadow-2xl dark:bg-stone-950"
+        className="w-full max-w-lg rounded-2xl border border-black/10 bg-white/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-stone-950/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-6"
       >
-        <div className="mb-6">
-          <p className="text-sm font-medium text-stone-500">New day</p>
+        <div className="mb-5">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500">
+            New day
+          </p>
 
           <h2
             id="carry-forward-title"
-            className="mt-1 text-2xl font-semibold tracking-tight"
+            className="mt-1.5 text-2xl font-semibold tracking-tight text-stone-950 dark:text-white"
           >
             Bring previous work forward?
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-stone-500">
-            Choose what you want to carry into today. Nothing will be
-            transferred automatically.
+          <p className="mt-2 text-sm leading-6 text-stone-500 dark:text-stone-400">
+            Choose what you want to carry into today. Nothing is transferred
+            automatically.
           </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-1.5">
           <CarryForwardOption
             label="Priorities"
             description={`${incompletePriorities.length} incomplete ${
@@ -166,17 +164,17 @@ export function CarryForwardDialog({
         </div>
 
         {error && (
-          <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">
+          <p className="mt-3 rounded-xl border border-red-200/70 bg-red-50/60 px-3.5 py-2.5 text-sm text-red-700 backdrop-blur-xl dark:border-red-400/10 dark:bg-red-950/30 dark:text-red-300">
             {error}
           </p>
         )}
 
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={handleStartFresh}
             disabled={pending}
-            className="rounded-xl border px-4 py-3 text-sm font-medium transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-stone-900"
+            className="rounded-xl border border-black/10 bg-white/30 px-4 py-2.5 text-sm font-medium text-stone-600 backdrop-blur-xl transition hover:bg-white/55 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
           >
             Start Fresh
           </button>
@@ -185,7 +183,7 @@ export function CarryForwardDialog({
             type="button"
             onClick={handleTransfer}
             disabled={pending || selectedCount === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-stone-900 dark:hover:bg-stone-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-stone-950 px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
           >
             {pending ? "Saving…" : "Transfer Selected"}
 
@@ -217,20 +215,20 @@ function CarryForwardOption({
       aria-checked={checked}
       disabled={disabled}
       onClick={onChange}
-      className={`flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
+      className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
         checked
-          ? "border-stone-400 bg-stone-50 dark:border-stone-600 dark:bg-stone-900"
-          : "border-stone-200 dark:border-stone-800"
+          ? "border-black/15 bg-white/50 dark:border-white/15 dark:bg-white/[0.06]"
+          : "border-black/10 bg-white/25 dark:border-white/10 dark:bg-white/[0.025]"
       } ${
         disabled
-          ? "cursor-not-allowed opacity-50"
-          : "hover:bg-stone-50 dark:hover:bg-stone-900"
+          ? "cursor-not-allowed opacity-45"
+          : "hover:bg-white/50 dark:hover:bg-white/[0.06]"
       }`}
     >
       <span
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
           checked
-            ? "border-stone-900 bg-stone-900 text-white dark:border-white dark:bg-white dark:text-stone-900"
+            ? "border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950"
             : "border-stone-300 dark:border-stone-700"
         }`}
       >
@@ -238,9 +236,13 @@ function CarryForwardOption({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium">{label}</span>
+        <span className="block text-sm font-medium text-stone-800 dark:text-stone-200">
+          {label}
+        </span>
 
-        <span className="mt-1 block text-xs text-stone-500">{description}</span>
+        <span className="mt-0.5 block text-xs text-stone-400 dark:text-stone-500">
+          {description}
+        </span>
       </span>
     </button>
   );

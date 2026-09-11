@@ -42,7 +42,6 @@ import { CarryForwardDialog } from "@/components/daily/carry-forward-dialog";
 
 function formatDailyDate(dateString: string) {
   const [year, month, day] = dateString.split("-").map(Number);
-
   const date = new Date(Date.UTC(year, month - 1, day));
 
   return new Intl.DateTimeFormat("en-US", {
@@ -56,19 +55,13 @@ function formatDailyDate(dateString: string) {
 
 export function DailyPage({ initial }: { initial: DailyPageType }) {
   const [priorities, setPriorities] = useState(initial.priorities);
-
   const [tasks, setTasks] = useState(initial.tasks);
-
   const [priorityDraft, setPriorityDraft] = useState("");
-
   const [taskDraft, setTaskDraft] = useState("");
-
   const [note, setNote] = useState(initial.note?.content ?? "");
-
   const [showCarryForward, setShowCarryForward] = useState(
     initial.carryForwardAvailable,
   );
-
   const [pending, startTransition] = useTransition();
 
   const sensors = useSensors(
@@ -99,7 +92,6 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     }
 
     const oldIndex = priorities.findIndex((item) => item.id === active.id);
-
     const newIndex = priorities.findIndex((item) => item.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
@@ -131,7 +123,6 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     }
 
     const oldIndex = tasks.findIndex((item) => item.id === active.id);
-
     const newIndex = tasks.findIndex((item) => item.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
@@ -187,7 +178,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     }
   }
 
-  const updateLocalPriority = (id: string, patch: Partial<Priority>) => {
+  function updateLocalPriority(id: string, patch: Partial<Priority>) {
     setPriorities((items) =>
       items.map((item) =>
         item.id === id
@@ -198,9 +189,9 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
           : item,
       ),
     );
-  };
+  }
 
-  const updateLocalTask = (id: string, patch: Partial<Task>) => {
+  function updateLocalTask(id: string, patch: Partial<Task>) {
     setTasks((items) =>
       items.map((item) =>
         item.id === id
@@ -211,7 +202,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
           : item,
       ),
     );
-  };
+  }
 
   function handleCarryForwardComplete() {
     setShowCarryForward(false);
@@ -234,39 +225,41 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
         />
       )}
 
-      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-9">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-stone-500">
+            <p className="text-sm font-medium text-stone-500 dark:text-stone-400">
               {formatDailyDate(initial.day.date)}
             </p>
 
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+            <h1 className="mt-1.5 text-3xl font-semibold tracking-tight text-stone-950 dark:text-white sm:text-4xl">
               What matters today?
             </h1>
           </div>
 
           <div
-            className={`rounded-full border px-4 py-2 text-sm ${
+            className={`w-fit rounded-xl border px-3 py-2 text-xs font-medium ${
               accomplished
-                ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
-                : "text-stone-500"
+                ? "border-emerald-300/60 bg-emerald-50/40 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/20 dark:text-emerald-300"
+                : "border-black/10 bg-white/30 text-stone-500 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-400"
             }`}
           >
             {topThreeComplete}/3 top priorities complete
-            {accomplished ? " — Day accomplished" : ""}
+            {accomplished ? " · Day accomplished" : ""}
           </div>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(320px,.8fr)]">
-          <div className="space-y-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+          <div className="space-y-8">
             <section>
-              <div className="mb-4 flex items-end justify-between gap-4">
+              <div className="mb-3 flex items-end justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold">Top Priorities</h2>
+                  <h2 className="text-lg font-semibold text-stone-950 dark:text-white">
+                    Top Priorities
+                  </h2>
 
-                  <p className="mt-1 text-sm text-stone-500">
-                    Aim for 3–5. Maximum 7. Drag to change priority order.
+                  <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                    Aim for 3–5. Maximum 7. Drag to reorder.
                   </p>
                 </div>
 
@@ -285,7 +278,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                   items={priorities.map((item) => item.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {priorities.map((priority, index) => (
                       <SortableRow
                         key={priority.id}
@@ -321,7 +314,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                 </SortableContext>
               </DndContext>
 
-              <div className="mt-3 flex gap-2">
+              <div className="mt-2 flex gap-2">
                 <input
                   value={priorityDraft}
                   onChange={(event) => setPriorityDraft(event.target.value)}
@@ -336,7 +329,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                       ? "Maximum of 7 priorities reached"
                       : "Add a priority"
                   }
-                  className="min-w-0 flex-1 rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-stone-300 disabled:cursor-not-allowed disabled:bg-stone-100 dark:bg-stone-950 dark:disabled:bg-stone-900"
+                  className="min-w-0 flex-1 rounded-xl border border-black/10 bg-white/35 px-3.5 py-2.5 text-sm text-stone-950 outline-none backdrop-blur-xl transition placeholder:text-stone-400 focus:border-black/20 focus:bg-white/50 focus:ring-2 focus:ring-black/5 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-stone-500 dark:focus:border-white/20 dark:focus:bg-white/[0.07]"
                 />
 
                 <button
@@ -345,21 +338,22 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                     !priorityDraft.trim() || priorities.length >= 7 || pending
                   }
                   onClick={() => startTransition(createPriority)}
-                  className="rounded-xl border bg-white px-4 disabled:opacity-40 dark:bg-stone-950"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white/35 text-stone-600 backdrop-blur-xl transition hover:bg-white/55 disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-300 dark:hover:bg-white/[0.08]"
                   aria-label="Add priority"
                 >
-                  <Plus size={18} />
+                  <Plus size={17} />
                 </button>
               </div>
             </section>
 
             <section>
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold">Tasks</h2>
+              <div className="mb-3">
+                <h2 className="text-lg font-semibold text-stone-950 dark:text-white">
+                  Tasks
+                </h2>
 
-                <p className="mt-1 text-sm text-stone-500">
-                  Work through the details. Choose what carries into each new
-                  day.
+                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                  Work through the details and carry forward what remains.
                 </p>
               </div>
 
@@ -373,7 +367,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                   items={tasks.map((item) => item.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {tasks.map((task) => (
                       <SortableRow
                         key={task.id}
@@ -407,7 +401,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                 </SortableContext>
               </DndContext>
 
-              <div className="mt-3 flex gap-2">
+              <div className="mt-2 flex gap-2">
                 <input
                   value={taskDraft}
                   onChange={(event) => setTaskDraft(event.target.value)}
@@ -417,27 +411,29 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                     }
                   }}
                   placeholder="Add a task"
-                  className="min-w-0 flex-1 rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-stone-300 dark:bg-stone-950"
+                  className="min-w-0 flex-1 rounded-xl border border-black/10 bg-white/35 px-3.5 py-2.5 text-sm text-stone-950 outline-none backdrop-blur-xl transition placeholder:text-stone-400 focus:border-black/20 focus:bg-white/50 focus:ring-2 focus:ring-black/5 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-stone-500 dark:focus:border-white/20 dark:focus:bg-white/[0.07]"
                 />
 
                 <button
                   type="button"
                   disabled={!taskDraft.trim() || pending}
                   onClick={() => startTransition(createTask)}
-                  className="rounded-xl border bg-white px-4 disabled:opacity-40 dark:bg-stone-950"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white/35 text-stone-600 backdrop-blur-xl transition hover:bg-white/55 disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-300 dark:hover:bg-white/[0.08]"
                   aria-label="Add task"
                 >
-                  <Plus size={18} />
+                  <Plus size={17} />
                 </button>
               </div>
             </section>
           </div>
 
           <section className="lg:sticky lg:top-24 lg:self-start">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold">Notes</h2>
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold text-stone-950 dark:text-white">
+                Notes
+              </h2>
 
-              <p className="mt-1 text-sm text-stone-500">
+              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
                 Capture what happened while you worked.
               </p>
             </div>
@@ -449,10 +445,10 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
                 startTransition(() => saveNote(initial.day.id, note))
               }
               placeholder="Meeting notes, decisions, progress, observations…"
-              className="min-h-[420px] w-full resize-y rounded-2xl border bg-stone-100/70 p-5 leading-7 outline-none focus:ring-2 focus:ring-stone-300 dark:bg-stone-900/60 lg:min-h-[600px]"
+              className="min-h-[360px] w-full resize-y rounded-2xl border border-black/10 bg-white/35 p-4 text-sm leading-7 text-stone-950 outline-none backdrop-blur-xl transition placeholder:text-stone-400 focus:border-black/20 focus:bg-white/50 focus:ring-2 focus:ring-black/5 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-stone-500 dark:focus:border-white/20 dark:focus:bg-white/[0.07] lg:min-h-[500px]"
             />
 
-            <p className="mt-2 text-right text-xs text-stone-400">
+            <p className="mt-1.5 text-right text-xs text-stone-400">
               Saved when you leave the notes field.
             </p>
           </section>

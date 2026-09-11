@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { ThemeSelector } from "@/components/theme/theme-selector";
 import { CarryForwardSettings } from "@/components/settings/carry-forward-settings";
+import { ThemeSelector } from "@/components/theme/theme-selector";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateSettings } from "@/lib/services/settings";
 
@@ -15,44 +15,64 @@ export default async function SettingsPage() {
   const settings = await getOrCreateSettings(data.user.id);
 
   return (
-    <main className="mx-auto max-w-2xl px-5 py-10 sm:px-8">
-      <h1 className="text-4xl font-semibold tracking-tight">Settings</h1>
-
-      <section className="mt-8 rounded-2xl border bg-white p-5 dark:bg-stone-950">
-        <h2 className="font-semibold">Appearance</h2>
-
-        <p className="mt-1 mb-4 text-sm text-stone-500">
-          Choose exactly how the daily page should follow your device.
+    <main className="mx-auto w-full max-w-2xl">
+      <div className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-stone-400">
+          Preferences
         </p>
 
-        <ThemeSelector initialTheme={settings.theme} />
-      </section>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight">Settings</h1>
 
-      <section className="mt-4 rounded-2xl border bg-white p-5 dark:bg-stone-950">
-        <h2 className="font-semibold">New Day Defaults</h2>
-
-        <p className="mt-1 mb-4 text-sm text-stone-500">
-          Choose what should be selected by default when carrying content into a
-          new day.
+        <p className="mt-2 text-stone-500 dark:text-stone-400">
+          Customize how Checkmarkr works for you.
         </p>
+      </div>
 
-        <CarryForwardSettings
-          initialPriorities={settings.carry_forward_priorities}
-          initialTasks={settings.carry_forward_tasks}
-          initialNotes={settings.carry_forward_notes}
-        />
-      </section>
+      <div className="grid gap-4">
+        <section className="glass glass-highlight rounded-3xl p-5 sm:p-6">
+          <div className="relative z-10">
+            <h2 className="font-semibold">Appearance</h2>
 
-      <section className="mt-4 rounded-2xl border bg-white p-5 dark:bg-stone-950">
-        <h2 className="font-semibold">Timezone</h2>
+            <p className="mb-5 mt-1 text-sm text-stone-500 dark:text-stone-400">
+              Choose exactly how the daily page should follow your device.
+            </p>
 
-        <p className="mt-1 text-sm text-stone-500">{settings.timezone}</p>
+            <ThemeSelector initialTheme={settings.theme} />
+          </div>
+        </section>
 
-        <p className="mt-2 text-xs text-stone-400">
-          Automatically synchronized from this browser so each daily page uses
-          your local date.
-        </p>
-      </section>
+        <section className="glass glass-highlight rounded-3xl p-5 sm:p-6">
+          <div className="relative z-10">
+            <h2 className="font-semibold">New Day Defaults</h2>
+
+            <p className="mb-5 mt-1 max-w-xl text-sm text-stone-500 dark:text-stone-400">
+              Choose what should be selected by default when carrying content
+              into a new day.
+            </p>
+
+            <CarryForwardSettings
+              initialPriorities={settings.carry_forward_priorities}
+              initialTasks={settings.carry_forward_tasks}
+              initialNotes={settings.carry_forward_notes}
+            />
+          </div>
+        </section>
+
+        <section className="glass glass-highlight rounded-3xl p-5 sm:p-6">
+          <div className="relative z-10">
+            <h2 className="font-semibold">Timezone</h2>
+
+            <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+              {settings.timezone}
+            </p>
+
+            <p className="mt-2 text-xs leading-relaxed text-stone-400 dark:text-stone-500">
+              Automatically synchronized from this browser so each daily page
+              uses your local date.
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

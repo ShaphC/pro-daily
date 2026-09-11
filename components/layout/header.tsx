@@ -1,17 +1,17 @@
 import { signOut } from "@/lib/actions/auth";
+import { Logo } from "@/components/brand/logo";
 
 export function Header({ dateLabel }: { dateLabel?: string }) {
   return (
-    <header className="sticky top-0 z-30 border-b bg-stone-50/90 backdrop-blur dark:bg-stone-950/90">
+    <header className="fixed inset-x-0 top-0 z-30 border-b border-black/10 bg-stone-50/80 backdrop-blur-xl dark:border-white/10 dark:bg-stone-950/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.2em]">
-            Checkmarkr
-          </div>
-          {/* {dateLabel && <div className="mt-0.5 text-xs text-stone-500">{dateLabel}</div>} */}
-        </div>
+        <Logo />
+
         <form action={signOut}>
-          <button className="text-sm text-stone-500 transition hover:text-stone-950 dark:hover:text-white">
+          <button
+            type="submit"
+            className="text-sm text-stone-500 transition hover:text-stone-950 dark:text-stone-400 dark:hover:text-white"
+          >
             Sign out
           </button>
         </form>
