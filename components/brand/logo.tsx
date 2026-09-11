@@ -13,8 +13,8 @@ export function Logo({
 }: LogoProps) {
   const content = (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/40 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05]">
-        <span className="text-[10px] font-bold tracking-[-0.08em] text-stone-950 dark:text-white">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-stone-950 dark:border-white/10 dark:bg-white">
+        <span className="text-[10px] font-bold tracking-[-0.08em] text-white dark:text-stone-950">
           CMkr
         </span>
       </div>

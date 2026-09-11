@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateSettings } from "@/lib/services/settings";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { TimezoneSync } from "@/components/theme/timezone-sync";
 import { ThemeSync } from "@/components/theme/theme-sync";
-import { createClient } from "@/lib/supabase/server";
 import { dateInTimezone } from "@/lib/services/daily";
-import { getOrCreateSettings } from "@/lib/services/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +39,11 @@ export default async function AppLayout({
   return (
     <>
       <ThemeSync theme={settings.theme} />
+
       <TimezoneSync storedTimezone={settings.timezone} />
 
       <div className="min-h-dvh">
-        <Header dateLabel={dateLabel} />
+        <Header dateLabel={dateLabel} theme={settings.theme} />
 
         <div className="safe-bottom pt-20">{children}</div>
 

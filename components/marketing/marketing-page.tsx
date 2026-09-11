@@ -10,16 +10,15 @@ import {
   History,
   Menu,
   Minus,
-  Moon,
   MoveRight,
   Plus,
   Sparkles,
-  Sun,
   Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 function Logo() {
   return (
@@ -28,70 +27,8 @@ function Logo() {
         <span className="absolute inset-0 bg-white/10 dark:bg-black/10" />
         <span className="relative">CMkr</span>
       </span>
-      <span>Checkmarkr</span>
+      <span>CheckMarkr</span>
     </span>
-  );
-}
-
-function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem("checkmarkr-theme");
-
-    if (storedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      document.documentElement.style.colorScheme = "dark";
-      setIsDark(true);
-    } else if (storedTheme === "light") {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.style.colorScheme = "light";
-      setIsDark(false);
-    } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-
-      document.documentElement.classList.toggle("dark", prefersDark);
-      document.documentElement.style.colorScheme = prefersDark
-        ? "dark"
-        : "light";
-      setIsDark(prefersDark);
-    }
-
-    setReady(true);
-  }, []);
-
-  function toggleTheme() {
-    const nextIsDark = !isDark;
-
-    document.documentElement.classList.toggle("dark", nextIsDark);
-    document.documentElement.style.colorScheme = nextIsDark ? "dark" : "light";
-
-    window.localStorage.setItem(
-      "checkmarkr-theme",
-      nextIsDark ? "dark" : "light",
-    );
-
-    setIsDark(nextIsDark);
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      disabled={!ready}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="glass flex h-10 w-10 items-center justify-center rounded-full text-black/60 transition duration-300 hover:-translate-y-0.5 hover:text-black dark:text-white/60 dark:hover:text-white"
-    >
-      {isDark ? (
-        <Sun className="h-4 w-4" strokeWidth={1.8} />
-      ) : (
-        <Moon className="h-4 w-4" strokeWidth={1.8} />
-      )}
-    </button>
   );
 }
 
@@ -870,7 +807,7 @@ export function MarketingPage() {
 
         <header className="glass-header fixed inset-x-0 top-0 z-50">
           <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 sm:px-8">
-            <Link href="/" aria-label="Checkmarkr home">
+            <Link href="/" aria-label="CheckMarkr home">
               <Logo />
             </Link>
 
@@ -905,6 +842,15 @@ export function MarketingPage() {
                 </a>
               </nav>
 
+              {!isAuthenticated && (
+                <Link
+                  href="/login"
+                  className="hidden rounded-full border border-black/10 bg-transparent px-4 py-2.5 text-xs font-bold text-black/65 transition duration-300 hover:bg-black/[0.04] hover:text-black dark:border-white/10 dark:text-white/65 dark:hover:bg-white/[0.05] dark:hover:text-white sm:inline-flex"
+                >
+                  Log in
+                </Link>
+              )}
+
               <Link
                 href={ctaHref}
                 className="group flex items-center gap-2 rounded-full border border-black/10 bg-black px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-white dark:text-black dark:shadow-black/20"
@@ -913,7 +859,10 @@ export function MarketingPage() {
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
 
-              <ThemeToggle />
+              <ThemeToggle
+                initialTheme="system"
+                authenticated={isAuthenticated}
+              />
 
               <button
                 type="button"
@@ -946,7 +895,7 @@ export function MarketingPage() {
                 </h1>
 
                 <p className="mt-7 max-w-xl animate-preview-section text-base font-medium leading-7 text-black/65 [animation-delay:260ms] dark:text-white/55 sm:text-lg">
-                  Checkmarkr turns your daily paper workflow into a focused
+                  CheckMarkr turns your daily paper workflow into a focused
                   digital workspace for priorities, tasks, notes, and the work
                   you actually want to remember.
                 </p>
@@ -965,7 +914,7 @@ export function MarketingPage() {
                     className="glass flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold text-black/70 transition duration-300 hover:-translate-y-0.5 hover:text-black dark:text-white/70 dark:hover:text-white sm:w-auto"
                   >
                     See how it works
-                    <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    <ChevronRight className="h-4 w-4" />
                   </a>
                 </div>
 
@@ -1277,7 +1226,7 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Checkmarkr is still being shaped around real usage. Start with
+                CheckMarkr is still being shaped around real usage. Start with
                 the core daily workflow while the rest of the product develops.
               </p>
             </div>
@@ -1400,7 +1349,7 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Once people start using Checkmarkr, this is where their
+                Once people start using CheckMarkr, this is where their
                 experiences will live.
               </p>
             </div>
@@ -1413,7 +1362,7 @@ export function MarketingPage() {
                 },
                 {
                   label: "Your second testimonial",
-                  prompt: "What did they stop doing because of Checkmarkr?",
+                  prompt: "What did they stop doing because of CheckMarkr?",
                 },
                 {
                   label: "Your third testimonial",
@@ -1479,7 +1428,7 @@ export function MarketingPage() {
 
         <footer className="relative z-10">
           <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <Link href="/" aria-label="Checkmarkr home">
+            <Link href="/" aria-label="CheckMarkr home">
               <Logo />
             </Link>
 
