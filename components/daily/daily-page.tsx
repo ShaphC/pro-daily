@@ -18,6 +18,7 @@ import { CheckCircle2, Plus } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import type {
+  CarryForwardSource,
   DailyPage as DailyPageType,
   Priority,
   Task,
@@ -28,6 +29,7 @@ import {
   addTask,
   deletePriority,
   deleteTask,
+  getPreviousDayTransferSource,
   reorderPriorities,
   reorderTasks,
   saveNote,
@@ -37,11 +39,12 @@ import {
   updateTaskText,
 } from "@/lib/actions/daily";
 
-import { SortableRow } from "@/components/daily/sortable-row";
 import { CarryForwardDialog } from "@/components/daily/carry-forward-dialog";
+import { SortableRow } from "@/components/daily/sortable-row";
 
 function formatDailyDate(dateString: string) {
   const [year, month, day] = dateString.split("-").map(Number);
+
   const date = new Date(Date.UTC(year, month - 1, day));
 
   return new Intl.DateTimeFormat("en-US", {
@@ -55,13 +58,29 @@ function formatDailyDate(dateString: string) {
 
 export function DailyPage({ initial }: { initial: DailyPageType }) {
   const [priorities, setPriorities] = useState(initial.priorities);
+
   const [tasks, setTasks] = useState(initial.tasks);
+
   const [priorityDraft, setPriorityDraft] = useState("");
+
   const [taskDraft, setTaskDraft] = useState("");
+
   const [note, setNote] = useState(initial.note?.content ?? "");
+
   const [showCarryForward, setShowCarryForward] = useState(
     initial.carryForwardAvailable,
   );
+
+  const [manualCarryForwardSource, setManualCarryForwardSource] =
+    useState<CarryForwardSource | null>(null);
+
+  const [showManualCarryForward, setShowManualCarryForward] = useState(false);
+
+  const [manualCarryForwardLoading, setManualCarryForwardLoading] =
+    useState(false);
+
+  const [manualCarryForwardError, setManualCarryForwardError] = useState("");
+
   const [pending, startTransition] = useTransition();
 
   const sensors = useSensors(
@@ -92,6 +111,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     }
 
     const oldIndex = priorities.findIndex((item) => item.id === active.id);
+
     const newIndex = priorities.findIndex((item) => item.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
@@ -123,6 +143,7 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     }
 
     const oldIndex = tasks.findIndex((item) => item.id === active.id);
+
     const newIndex = tasks.findIndex((item) => item.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
@@ -212,6 +233,32 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
     });
   }
 
+  async function handleOpenManualCarryForward() {
+    setManualCarryForwardError("");
+    setManualCarryForwardLoading(true);
+
+    try {
+      const source = await getPreviousDayTransferSource(initial.day.id);
+
+      if (!source) {
+        setManualCarryForwardError(
+          "There is no transferable content from yesterday.",
+        );
+        return;
+      }
+
+      setManualCarryForwardSource(source);
+
+      setShowManualCarryForward(true);
+    } catch (error) {
+      setManualCarryForwardError(
+        error instanceof Error ? error.message : "Unable to check yesterday.",
+      );
+    } finally {
+      setManualCarryForwardLoading(false);
+    }
+  }
+
   return (
     <>
       {showCarryForward && initial.carryForwardSource && (
@@ -225,8 +272,30 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
         />
       )}
 
+      {showManualCarryForward && manualCarryForwardSource && (
+        <CarryForwardDialog
+          source={manualCarryForwardSource}
+          targetDayId={initial.day.id}
+          defaultPriorities={initial.carryForwardPriorities}
+          defaultTasks={initial.carryForwardTasks}
+          defaultNotes={initial.carryForwardNotes}
+          mode="manual"
+          existingPriorities={priorities.length}
+          existingTasks={tasks.length}
+          hasExistingNote={Boolean(note.trim())}
+          onComplete={() => {
+            setShowManualCarryForward(false);
+
+            setManualCarryForwardSource(null);
+
+            window.location.reload();
+          }}
+        />
+      )}
+
       <main className="relative mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
         <div className="pointer-events-none absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-stone-300/20 blur-3xl dark:bg-white/[0.035]" />
+
         <div className="pointer-events-none absolute right-0 top-64 h-80 w-80 rounded-full bg-stone-200/25 blur-3xl dark:bg-white/[0.025]" />
 
         <div className="relative">
@@ -245,18 +314,38 @@ export function DailyPage({ initial }: { initial: DailyPageType }) {
               </h1>
             </div>
 
-            <div
-              className={`flex w-fit items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium backdrop-blur-xl ${
-                accomplished
-                  ? "border-emerald-300/60 bg-emerald-50/70 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/30 dark:text-emerald-300"
-                  : "border-black/10 bg-white/45 text-stone-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-stone-400"
-              }`}
-            >
-              {accomplished && <CheckCircle2 size={14} />}
-              <span>
-                {topThreeComplete}/3 top priorities complete
-                {accomplished ? " · Day accomplished" : ""}
-              </span>
+            <div className="flex flex-col items-start gap-2 sm:items-end">
+              <div
+                className={`flex w-fit items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium backdrop-blur-xl ${
+                  accomplished
+                    ? "border-emerald-300/60 bg-emerald-50/70 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/30 dark:text-emerald-300"
+                    : "border-black/10 bg-white/45 text-stone-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-stone-400"
+                }`}
+              >
+                {accomplished && <CheckCircle2 size={14} />}
+
+                <span>
+                  {topThreeComplete}/3 top priorities complete
+                  {accomplished ? " · Day accomplished" : ""}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenManualCarryForward}
+                disabled={manualCarryForwardLoading}
+                className="text-xs font-medium text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-50 dark:text-stone-400 dark:decoration-stone-700 dark:hover:text-white"
+              >
+                {manualCarryForwardLoading
+                  ? "Checking yesterday…"
+                  : "Transfer from previous day"}
+              </button>
+
+              {manualCarryForwardError && (
+                <p className="max-w-xs text-right text-xs text-stone-400 dark:text-stone-500">
+                  {manualCarryForwardError}
+                </p>
+              )}
             </div>
           </div>
 

@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { ArrowRight, Check } from "lucide-react";
+import { useState, useTransition } from "react";
 
-import { startFreshDay, transferDayContent } from "@/lib/actions/daily";
+import {
+  startFreshDay,
+  transferDayContent,
+  transferPreviousDayContent,
+} from "@/lib/actions/daily";
 import type { CarryForwardSource } from "@/types/database";
 
 type CarryForwardDialogProps = {
@@ -12,6 +16,10 @@ type CarryForwardDialogProps = {
   defaultPriorities: boolean;
   defaultTasks: boolean;
   defaultNotes: boolean;
+  mode?: "new-day" | "manual";
+  existingPriorities?: number;
+  existingTasks?: number;
+  hasExistingNote?: boolean;
   onComplete: () => void;
 };
 
@@ -21,12 +29,22 @@ export function CarryForwardDialog({
   defaultPriorities,
   defaultTasks,
   defaultNotes,
+  mode = "new-day",
+  existingPriorities = 0,
+  existingTasks = 0,
+  hasExistingNote = false,
   onComplete,
 }: CarryForwardDialogProps) {
   const [priorities, setPriorities] = useState(defaultPriorities);
+
   const [tasks, setTasks] = useState(defaultTasks);
+
   const [notes, setNotes] = useState(defaultNotes);
+
+  const [replaceExisting, setReplaceExisting] = useState(false);
+
   const [pending, startTransition] = useTransition();
+
   const [error, setError] = useState("");
 
   const incompletePriorities = source.priorities.filter(
@@ -38,6 +56,11 @@ export function CarryForwardDialog({
   const hasNote = Boolean(source.note?.content.trim());
 
   const selectedCount = [priorities, tasks, notes].filter(Boolean).length;
+
+  const hasExistingContent =
+    existingPriorities > 0 || existingTasks > 0 || hasExistingNote;
+
+  const isManual = mode === "manual";
 
   function toggle(type: "priorities" | "tasks" | "notes") {
     const setters = {
@@ -75,13 +98,24 @@ export function CarryForwardDialog({
 
     startTransition(async () => {
       try {
-        await transferDayContent(
-          source.day.id,
-          targetDayId,
-          priorities,
-          tasks,
-          notes,
-        );
+        if (isManual) {
+          await transferPreviousDayContent(
+            source.day.id,
+            targetDayId,
+            priorities,
+            tasks,
+            notes,
+            replaceExisting,
+          );
+        } else {
+          await transferDayContent(
+            source.day.id,
+            targetDayId,
+            priorities,
+            tasks,
+            notes,
+          );
+        }
 
         onComplete();
       } catch (err) {
@@ -113,23 +147,26 @@ export function CarryForwardDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="carry-forward-title"
-        className="w-full max-w-lg rounded-2xl border border-black/10 bg-white/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-stone-950/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-6"
+        className="w-full max-w-lg rounded-2xl border border-black/10 bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.18)] dark:border-white/10 dark:bg-stone-950 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-6"
       >
         <div className="mb-5">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500">
-            New day
+            {isManual ? "Previous day" : "New day"}
           </p>
 
           <h2
             id="carry-forward-title"
             className="mt-1.5 text-2xl font-semibold tracking-tight text-stone-950 dark:text-white"
           >
-            Bring previous work forward?
+            {isManual
+              ? "Transfer from yesterday?"
+              : "Bring previous work forward?"}
           </h2>
 
           <p className="mt-2 text-sm leading-6 text-stone-500 dark:text-stone-400">
-            Choose what you want to carry into today. Nothing is transferred
-            automatically.
+            {isManual
+              ? "Choose what you want to bring from yesterday into today."
+              : "Choose what you want to carry into today. Nothing is transferred automatically."}
           </p>
         </div>
 
@@ -163,29 +200,61 @@ export function CarryForwardDialog({
           />
         </div>
 
+        {isManual && hasExistingContent && (
+          <div className="mt-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500">
+              Today's existing content
+            </p>
+
+            <div className="grid gap-1.5">
+              <TransferModeOption
+                label="Keep existing"
+                description="Add yesterday's selected content to what you already have."
+                checked={!replaceExisting}
+                disabled={pending}
+                onChange={() => setReplaceExisting(false)}
+              />
+
+              <TransferModeOption
+                label="Replace existing"
+                description="Erase today's selected categories before transferring."
+                checked={replaceExisting}
+                disabled={pending}
+                onChange={() => setReplaceExisting(true)}
+              />
+            </div>
+          </div>
+        )}
+
         {error && (
-          <p className="mt-3 rounded-xl border border-red-200/70 bg-red-50/60 px-3.5 py-2.5 text-sm text-red-700 backdrop-blur-xl dark:border-red-400/10 dark:bg-red-950/30 dark:text-red-300">
+          <p className="mt-3 rounded-xl border border-red-200/70 bg-red-50/60 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-400/10 dark:bg-red-950/30 dark:text-red-300">
             {error}
           </p>
         )}
 
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={handleStartFresh}
-            disabled={pending}
-            className="rounded-xl border border-black/10 bg-white/30 px-4 py-2.5 text-sm font-medium text-stone-600 backdrop-blur-xl transition hover:bg-white/55 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
-          >
-            Start Fresh
-          </button>
+          {!isManual && (
+            <button
+              type="button"
+              onClick={handleStartFresh}
+              disabled={pending}
+              className="rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white"
+            >
+              Start Fresh
+            </button>
+          )}
 
           <button
             type="button"
             onClick={handleTransfer}
             disabled={pending || selectedCount === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-stone-950 px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-stone-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
           >
-            {pending ? "Saving…" : "Transfer Selected"}
+            {pending
+              ? "Saving…"
+              : isManual
+                ? "Transfer Selected"
+                : "Transfer Selected"}
 
             {!pending && <ArrowRight size={16} />}
           </button>
@@ -217,12 +286,12 @@ function CarryForwardOption({
       onClick={onChange}
       className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
         checked
-          ? "border-black/15 bg-white/50 dark:border-white/15 dark:bg-white/[0.06]"
-          : "border-black/10 bg-white/25 dark:border-white/10 dark:bg-white/[0.025]"
+          ? "border-black/15 bg-stone-50 dark:border-white/15 dark:bg-white/[0.06]"
+          : "border-black/10 bg-white dark:border-white/10 dark:bg-white/[0.025]"
       } ${
         disabled
           ? "cursor-not-allowed opacity-45"
-          : "hover:bg-white/50 dark:hover:bg-white/[0.06]"
+          : "hover:bg-stone-50 dark:hover:bg-white/[0.06]"
       }`}
     >
       <span
@@ -233,6 +302,61 @@ function CarryForwardOption({
         }`}
       >
         {checked && <Check size={13} strokeWidth={3} />}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium text-stone-800 dark:text-stone-200">
+          {label}
+        </span>
+
+        <span className="mt-0.5 block text-xs text-stone-400 dark:text-stone-500">
+          {description}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function TransferModeOption({
+  label,
+  description,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  disabled: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={onChange}
+      className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+        checked
+          ? "border-black/15 bg-stone-50 dark:border-white/15 dark:bg-white/[0.06]"
+          : "border-black/10 bg-white dark:border-white/10 dark:bg-white/[0.025]"
+      } ${
+        disabled
+          ? "cursor-not-allowed opacity-50"
+          : "hover:bg-stone-50 dark:hover:bg-white/[0.06]"
+      }`}
+    >
+      <span
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+          checked
+            ? "border-stone-950 dark:border-white"
+            : "border-stone-300 dark:border-stone-700"
+        }`}
+      >
+        {checked && (
+          <span className="h-2.5 w-2.5 rounded-full bg-stone-950 dark:bg-white" />
+        )}
       </span>
 
       <span className="min-w-0 flex-1">

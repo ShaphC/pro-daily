@@ -38,9 +38,14 @@ export function ThemeToggle({
   authenticated = false,
 }: ThemeToggleProps) {
   const [theme, setTheme] = useState<ThemeMode>(initialTheme);
+
+  const [mounted, setMounted] = useState(false);
+
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    setMounted(true);
+
     const storedTheme = window.localStorage.getItem(
       "checkmarkr-theme",
     ) as ThemeMode | null;
@@ -60,6 +65,10 @@ export function ThemeToggle({
   }, [initialTheme]);
 
   useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
     if (theme !== "system") {
       applyTheme(theme);
       return;
@@ -78,7 +87,7 @@ export function ThemeToggle({
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, [theme]);
+  }, [theme, mounted]);
 
   function toggleTheme() {
     const currentTheme = theme === "system" ? getSystemTheme() : theme;
@@ -86,6 +95,7 @@ export function ThemeToggle({
     const nextTheme = currentTheme === "dark" ? "light" : "dark";
 
     setTheme(nextTheme);
+
     window.localStorage.setItem("checkmarkr-theme", nextTheme);
 
     applyTheme(nextTheme);
@@ -99,6 +109,26 @@ export function ThemeToggle({
         }
       });
     }
+  }
+
+  /*
+   * Keep the server-rendered markup identical to
+   * the first client render.
+   *
+   * Once mounted, the icon reflects the actual
+   * system/browser theme.
+   */
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        aria-label="Theme"
+        title="Theme"
+        className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/30 text-stone-600 backdrop-blur-xl transition hover:bg-white/55 hover:text-stone-950 dark:border-white/10 dark:bg-white/[0.04] dark:text-stone-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
+      >
+        <Sun size={17} strokeWidth={1.8} />
+      </button>
+    );
   }
 
   const resolvedTheme = theme === "system" ? getSystemTheme() : theme;

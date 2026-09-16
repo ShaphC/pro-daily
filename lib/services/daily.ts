@@ -25,7 +25,9 @@ export function dateInTimezone(timezone: string, date = new Date()) {
 
 function previousDate(date: string) {
   const value = new Date(`${date}T00:00:00Z`);
+
   value.setUTCDate(value.getUTCDate() - 1);
+
   return value.toISOString().slice(0, 10);
 }
 
@@ -36,18 +38,21 @@ async function getDayContent(
   const [dayResult, prioritiesResult, tasksResult, noteResult] =
     await Promise.all([
       supabase.from("pro_days").select("*").eq("id", dayId).single(),
+
       supabase
         .from("pro_priorities")
         .select("*")
         .eq("day_id", dayId)
         .order("position")
         .order("created_at"),
+
       supabase
         .from("pro_tasks")
         .select("*")
         .eq("day_id", dayId)
         .order("position")
         .order("created_at"),
+
       supabase
         .from("pro_notes")
         .select("*")
@@ -102,7 +107,9 @@ export async function getOrCreateDailyPage(
     .eq("date", date)
     .maybeSingle();
 
-  if (existingDayError) throw existingDayError;
+  if (existingDayError) {
+    throw existingDayError;
+  }
 
   const { data: dayId, error: dayError } = await supabase.rpc(
     "pro_get_or_create_day",
@@ -119,46 +126,42 @@ export async function getOrCreateDailyPage(
 
   let carryForwardSource: CarryForwardSource | null = null;
 
+  /*
+   * Only the immediately previous calendar day can
+   * be considered for the initial carry-forward prompt.
+   *
+   * Nothing is transferred automatically.
+   */
   if (!existingDay && !current.day.carry_forward_decided) {
-    let sourceDate = previousDate(date);
+    const sourceDate = previousDate(date);
 
-    while (!carryForwardSource) {
-      const { data: sourceDay, error: sourceDayError } = await supabase
-        .from("pro_days")
-        .select("*")
-        .eq("date", sourceDate)
-        .maybeSingle();
+    const { data: sourceDay, error: sourceDayError } = await supabase
+      .from("pro_days")
+      .select("*")
+      .eq("date", sourceDate)
+      .maybeSingle();
 
-      if (sourceDayError) throw sourceDayError;
+    if (sourceDayError) {
+      throw sourceDayError;
+    }
 
-      if (sourceDay) {
-        const sourceContent = await getDayContent(supabase, sourceDay.id);
+    if (sourceDay) {
+      const sourceContent = await getDayContent(supabase, sourceDay.id);
 
-        if (
-          hasTransferableContent(
-            sourceContent.priorities,
-            sourceContent.tasks,
-            sourceContent.note,
-          )
-        ) {
-          carryForwardSource = {
-            day: sourceContent.day,
-            priorities: sourceContent.priorities,
-            tasks: sourceContent.tasks,
-            note: sourceContent.note,
-          };
-
-          break;
-        }
+      if (
+        hasTransferableContent(
+          sourceContent.priorities,
+          sourceContent.tasks,
+          sourceContent.note,
+        )
+      ) {
+        carryForwardSource = {
+          day: sourceContent.day,
+          priorities: sourceContent.priorities,
+          tasks: sourceContent.tasks,
+          note: sourceContent.note,
+        };
       }
-
-      const nextDate = previousDate(sourceDate);
-
-      if (nextDate === sourceDate) {
-        break;
-      }
-
-      sourceDate = nextDate;
     }
   }
 
