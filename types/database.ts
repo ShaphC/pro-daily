@@ -74,3 +74,27 @@ export type DailyPage = {
   carryForwardTasks: boolean;
   carryForwardNotes: boolean;
 };
+
+export type OnboardingHelpGoal =
+  | "priorities"
+  | "tasks"
+  | "consistency"
+  | "focus"
+  | "organization"
+  | "follow-through";
+
+export type Onboarding = {
+  id: string;
+  user_id: string;
+  current_step: number;
+  completed: boolean;
+  skipped: boolean;
+  name: string | null;
+  task_habits: string | null;
+  help_goals: OnboardingHelpGoal[];
+  additional_questions: string | null;
+  commitment: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
