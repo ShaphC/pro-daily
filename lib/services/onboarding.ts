@@ -29,6 +29,7 @@ export async function getOrCreateOnboarding(
       user_id: userId,
       current_step: 1,
       completed: false,
+      skipped: false,
       help_goals: [],
     })
     .select("*")
@@ -42,4 +43,16 @@ export async function getOrCreateOnboarding(
     ...data,
     help_goals: Array.isArray(data.help_goals) ? data.help_goals : [],
   } as Onboarding;
+}
+
+export async function getPostAuthPath(
+  userId: string,
+): Promise<"/onboarding" | "/today"> {
+  const onboarding = await getOrCreateOnboarding(userId);
+
+  if (!onboarding.completed && !onboarding.skipped) {
+    return "/onboarding";
+  }
+
+  return "/today";
 }

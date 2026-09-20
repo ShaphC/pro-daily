@@ -9,13 +9,13 @@ import {
 } from "@/lib/actions/onboarding";
 import type { Onboarding, OnboardingHelpGoal } from "@/types/database";
 import { OnboardingProgress } from "./onboarding-progress";
+import { GoalCardsStep } from "./steps/goal-cards";
 import { HelpGoalsStep } from "./steps/help-goals";
 import { NameStep } from "./steps/name";
-import { TaskHabitsStep } from "./steps/task-habits";
-import { WelcomeStep } from "./steps/welcome";
-import { GoalCardsStep } from "./steps/goal-cards";
 import { PrioritiesStep } from "./steps/priorities";
 import { ReadyStep } from "./steps/ready";
+import { TaskHabitsStep } from "./steps/task-habits";
+import { WelcomeStep } from "./steps/welcome";
 import { WhyThreeStep } from "./steps/why-three";
 
 const TOTAL_STEPS = 19;
@@ -34,18 +34,29 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
   const [pending, startTransition] = useTransition();
 
   function goToStep(nextStep: number) {
-    if (nextStep < 1 || nextStep > TOTAL_STEPS) {
+    if (pending || nextStep < 1 || nextStep > TOTAL_STEPS) {
       return;
     }
 
     setError("");
     setStep(nextStep);
 
+    setOnboarding((current) => ({
+      ...current,
+      current_step: nextStep,
+    }));
+
     startTransition(async () => {
       try {
         await setOnboardingStep(nextStep);
       } catch (error) {
         console.error(error);
+
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to save your progress.",
+        );
       }
     });
   }
@@ -55,6 +66,10 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
     taskHabits?: string;
     helpGoals?: OnboardingHelpGoal[];
   }) {
+    if (pending) {
+      return;
+    }
+
     setError("");
 
     const nextStep = Math.min(step + 1, TOTAL_STEPS);
@@ -81,6 +96,32 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
           error instanceof Error
             ? error.message
             : "Unable to save your progress.",
+        );
+      }
+    });
+  }
+
+  function handleSkip() {
+    if (pending) {
+      return;
+    }
+
+    setError("");
+
+    startTransition(async () => {
+      try {
+        await skipOnboarding();
+
+        setOnboarding((current) => ({
+          ...current,
+          skipped: true,
+          completed: false,
+        }));
+
+        window.location.href = "/today";
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Unable to skip onboarding.",
         );
       }
     });
@@ -154,7 +195,8 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
             <button
               type="button"
               onClick={() => goToStep(Math.max(1, step - 1))}
-              className="mt-6 rounded-full bg-stone-950 px-5 py-3 text-xs font-bold text-white transition hover:bg-stone-800 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
+              disabled={pending}
+              className="mt-6 rounded-xl border bg-stone-950 px-5 py-3 text-xs font-semibold text-white transition hover:bg-stone-800 disabled:opacity-50 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
             >
               Back
             </button>
@@ -165,11 +207,11 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
 
   return (
     <main className="min-h-screen bg-stone-50 px-5 py-8 text-stone-950 dark:bg-stone-950 dark:text-white sm:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl flex-col">
-        <header className="mb-10">
-          <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl flex-col rounded-3xl border bg-white p-7 shadow-sm dark:bg-stone-900 sm:p-9">
+        <header className="mb-8">
+          <div className="mb-7 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-stone-950 dark:border-white/10 dark:bg-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border bg-stone-950 dark:bg-white">
                 <span className="text-[10px] font-bold tracking-[-0.08em] text-white dark:text-stone-950">
                   CMkr
                 </span>
@@ -198,7 +240,7 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
         <div className="flex flex-1 items-center">
           <div className="w-full">
             {error && (
-              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+              <div className="mb-6 rounded-xl border bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
                 {error}
               </div>
             )}
@@ -207,25 +249,12 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
           </div>
         </div>
 
-        <footer className="pt-10 text-center">
+        <footer className="pt-8 text-center">
           <button
             type="button"
             disabled={pending}
-            onClick={() => {
-              startTransition(async () => {
-                try {
-                  await skipOnboarding();
-                  window.location.href = "/today";
-                } catch (error) {
-                  setError(
-                    error instanceof Error
-                      ? error.message
-                      : "Unable to skip onboarding.",
-                  );
-                }
-              });
-            }}
-            className="text-xs text-stone-400 transition hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300"
+            onClick={handleSkip}
+            className="text-xs text-stone-400 transition hover:text-stone-700 disabled:opacity-50 dark:text-stone-500 dark:hover:text-stone-300"
           >
             Skip for now
           </button>
