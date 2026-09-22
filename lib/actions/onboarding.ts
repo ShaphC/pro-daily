@@ -35,6 +35,8 @@ export async function saveOnboardingStep(
     name?: string;
     taskHabits?: string;
     helpGoals?: OnboardingHelpGoal[];
+    additionalQuestions?: string;
+    commitment?: string;
   },
 ) {
   if (nextStep < 1 || nextStep > 19) {
@@ -81,6 +83,22 @@ export async function saveOnboardingStep(
     updates.help_goals = goals;
   }
 
+  if (values.additionalQuestions !== undefined) {
+    updates.additional_questions = values.additionalQuestions
+      .trim()
+      .slice(0, 1000);
+  }
+
+  if (values.commitment !== undefined) {
+    const commitment = values.commitment.trim();
+
+    if (!commitment) {
+      throw new Error("Please enter your commitment");
+    }
+
+    updates.commitment = commitment.slice(0, 300);
+  }
+
   const { error } = await supabase
     .from("pro_onboarding")
     .update(updates)
@@ -121,6 +139,7 @@ export async function completeOnboarding() {
     .from("pro_onboarding")
     .update({
       completed: true,
+      skipped: false,
       current_step: 19,
       completed_at: new Date().toISOString(),
     })

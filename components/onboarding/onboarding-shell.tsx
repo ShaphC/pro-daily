@@ -3,18 +3,30 @@
 import { useState, useTransition } from "react";
 
 import {
+  completeOnboarding,
   saveOnboardingStep,
   setOnboardingStep,
   skipOnboarding,
 } from "@/lib/actions/onboarding";
 import type { Onboarding, OnboardingHelpGoal } from "@/types/database";
 import { OnboardingProgress } from "./onboarding-progress";
+import { CommitmentStep } from "./steps/commitment";
+import { CompleteTaskStep } from "./steps/complete-task";
+import { AdditionalQuestionsStep } from "./steps/additional-questions";
+import { FinalSnapshotStep } from "./steps/final-snapshot";
 import { GoalCardsStep } from "./steps/goal-cards";
 import { HelpGoalsStep } from "./steps/help-goals";
+import { MakeTasksSmallerStep } from "./steps/make-tasks-smaller";
+import { MomentumStep } from "./steps/momentum";
 import { NameStep } from "./steps/name";
+import { NotesStep } from "./steps/notes";
 import { PrioritiesStep } from "./steps/priorities";
 import { ReadyStep } from "./steps/ready";
+import { ReflectionStep } from "./steps/reflection";
+import { RestStep } from "./steps/rest";
+import { StartTrialStep } from "./steps/start-trial";
 import { TaskHabitsStep } from "./steps/task-habits";
+import { TasksStep } from "./steps/tasks";
 import { WelcomeStep } from "./steps/welcome";
 import { WhyThreeStep } from "./steps/why-three";
 
@@ -65,6 +77,8 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
     name?: string;
     taskHabits?: string;
     helpGoals?: OnboardingHelpGoal[];
+    additionalQuestions?: string;
+    commitment?: string;
   }) {
     if (pending) {
       return;
@@ -83,6 +97,16 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
       ...(values.helpGoals !== undefined
         ? { help_goals: values.helpGoals }
         : {}),
+      ...(values.additionalQuestions !== undefined
+        ? {
+            additional_questions: values.additionalQuestions,
+          }
+        : {}),
+      ...(values.commitment !== undefined
+        ? {
+            commitment: values.commitment,
+          }
+        : {}),
       current_step: nextStep,
     }));
 
@@ -96,6 +120,28 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
           error instanceof Error
             ? error.message
             : "Unable to save your progress.",
+        );
+      }
+    });
+  }
+
+  function handleComplete() {
+    if (pending) {
+      return;
+    }
+
+    setError("");
+
+    startTransition(async () => {
+      try {
+        await completeOnboarding();
+
+        window.location.href = "/today";
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to finish onboarding.",
         );
       }
     });
@@ -185,6 +231,78 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
       case 8:
         return <WhyThreeStep onNext={() => handleNext({})} pending={pending} />;
 
+      case 9:
+        return <TasksStep onNext={() => handleNext({})} pending={pending} />;
+
+      case 10:
+        return (
+          <MakeTasksSmallerStep
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
+        );
+
+      case 11:
+        return (
+          <CompleteTaskStep onNext={() => handleNext({})} pending={pending} />
+        );
+
+      case 12:
+        return <MomentumStep onNext={() => handleNext({})} pending={pending} />;
+
+      case 13:
+        return <NotesStep onNext={() => handleNext({})} pending={pending} />;
+
+      case 14:
+        return <RestStep onNext={() => handleNext({})} pending={pending} />;
+
+      case 15:
+        return (
+          <AdditionalQuestionsStep
+            initialValue={onboarding.additional_questions ?? ""}
+            onNext={(additionalQuestions) =>
+              handleNext({
+                additionalQuestions,
+              })
+            }
+            pending={pending}
+          />
+        );
+
+      case 16:
+        return (
+          <ReflectionStep
+            name={onboarding.name}
+            taskHabits={onboarding.task_habits}
+            goals={onboarding.help_goals}
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
+        );
+
+      case 17:
+        return (
+          <CommitmentStep
+            initialValue={onboarding.commitment ?? ""}
+            onNext={(commitment) => handleNext({ commitment })}
+            pending={pending}
+          />
+        );
+
+      case 18:
+        return (
+          <FinalSnapshotStep
+            name={onboarding.name}
+            goals={onboarding.help_goals}
+            commitment={onboarding.commitment}
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
+        );
+
+      case 19:
+        return <StartTrialStep pending={pending} onComplete={handleComplete} />;
+
       default:
         return (
           <div className="text-center">
@@ -222,7 +340,7 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
               </span>
             </div>
 
-            {step > 1 && (
+            {step > 1 && step < 19 && (
               <button
                 type="button"
                 onClick={() => goToStep(step - 1)}
@@ -249,16 +367,18 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
           </div>
         </div>
 
-        <footer className="pt-8 text-center">
-          <button
-            type="button"
-            disabled={pending}
-            onClick={handleSkip}
-            className="text-xs text-stone-400 transition hover:text-stone-700 disabled:opacity-50 dark:text-stone-500 dark:hover:text-stone-300"
-          >
-            Skip for now
-          </button>
-        </footer>
+        {step < 19 && (
+          <footer className="pt-8 text-center">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={handleSkip}
+              className="text-xs text-stone-400 transition hover:text-stone-700 disabled:opacity-50 dark:text-stone-500 dark:hover:text-stone-300"
+            >
+              Skip for now
+            </button>
+          </footer>
+        )}
       </div>
     </main>
   );
