@@ -48,10 +48,14 @@ export function SortableRow({
       className={[
         "group flex min-h-12 items-center gap-2.5 rounded-2xl border px-3 py-2.5",
         "backdrop-blur-xl transition-all",
-        emphasis
-          ? "border-black/[0.13] bg-white/[0.62] shadow-[0_8px_25px_rgba(0,0,0,0.035)] dark:border-white/[0.13] dark:bg-white/[0.065]"
-          : "border-black/[0.07] bg-white/[0.30] dark:border-white/[0.07] dark:bg-white/[0.025]",
-        "hover:-translate-y-px hover:border-black/[0.13] hover:bg-white/[0.55] hover:shadow-[0_8px_25px_rgba(0,0,0,0.04)] dark:hover:border-white/[0.13] dark:hover:bg-white/[0.055]",
+        completed
+          ? "border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950"
+          : emphasis
+            ? "border-black/[0.13] bg-white/[0.62] shadow-[0_8px_25px_rgba(0,0,0,0.035)] dark:border-white/[0.13] dark:bg-white/[0.065]"
+            : "border-black/[0.07] bg-white/[0.30] dark:border-white/[0.07] dark:bg-white/[0.025]",
+        !completed
+          ? "hover:-translate-y-px hover:border-black/[0.13] hover:bg-white/[0.55] hover:shadow-[0_8px_25px_rgba(0,0,0,0.04)] dark:hover:border-white/[0.13] dark:hover:bg-white/[0.055]"
+          : "",
         isDragging
           ? "z-20 scale-[1.015] shadow-[0_25px_70px_rgba(0,0,0,0.16)]"
           : "",
@@ -60,7 +64,11 @@ export function SortableRow({
     >
       <button
         type="button"
-        className="shrink-0 cursor-grab touch-none rounded-md text-stone-400 transition hover:text-stone-700 active:cursor-grabbing dark:hover:text-stone-200"
+        className={`shrink-0 cursor-grab touch-none rounded-md transition active:cursor-grabbing ${
+          completed
+            ? "text-white/60 hover:text-white dark:text-stone-500 dark:hover:text-stone-800"
+            : "text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+        }`}
         aria-label="Drag to reorder"
         {...attributes}
         {...listeners}
@@ -71,9 +79,11 @@ export function SortableRow({
       {rank !== undefined && (
         <span
           className={`w-4 shrink-0 text-xs font-semibold ${
-            emphasis
-              ? "text-stone-700 dark:text-stone-300"
-              : "text-stone-400 dark:text-stone-500"
+            completed
+              ? "text-white/60 dark:text-stone-500"
+              : emphasis
+                ? "text-stone-700 dark:text-stone-300"
+                : "text-stone-400 dark:text-stone-500"
           }`}
         >
           {rank + 1}
@@ -86,7 +96,11 @@ export function SortableRow({
         onChange={(event) =>
           startTransition(() => onToggle(event.target.checked))
         }
-        className="h-4 w-4 shrink-0 cursor-pointer rounded border-stone-300 accent-stone-950 dark:border-stone-600 dark:accent-stone-100"
+        className={`h-4 w-4 shrink-0 cursor-pointer rounded border ${
+          completed
+            ? "border-white accent-white dark:border-stone-950 dark:accent-stone-950"
+            : "border-stone-300 accent-stone-950 dark:border-stone-600 dark:accent-stone-100"
+        }`}
       />
 
       <input
@@ -106,7 +120,7 @@ export function SortableRow({
         }}
         className={`min-w-0 flex-1 bg-transparent text-sm font-medium outline-none ${
           completed
-            ? "text-stone-400 line-through dark:text-stone-500"
+            ? "text-white line-through dark:text-stone-500"
             : "text-stone-800 dark:text-stone-200"
         }`}
       />
@@ -114,7 +128,11 @@ export function SortableRow({
       <button
         type="button"
         onClick={() => startTransition(() => onDelete())}
-        className="shrink-0 rounded-lg p-1 text-stone-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 focus:opacity-100 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+        className={`shrink-0 rounded-lg p-1 transition ${
+          completed
+            ? "text-white/50 opacity-0 hover:bg-white/10 hover:text-white group-hover:opacity-100 focus:opacity-100 dark:text-stone-500 dark:hover:bg-stone-950/10 dark:hover:text-stone-950"
+            : "text-stone-400 opacity-0 hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 focus:opacity-100 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+        }`}
         aria-label="Delete"
       >
         <Trash2 size={15} />

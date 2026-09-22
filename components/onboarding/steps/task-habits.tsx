@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 const options = [
   {
     value: "lists",
@@ -34,6 +36,16 @@ export function TaskHabitsStep({
   onNext,
   pending,
 }: TaskHabitsStepProps) {
+  const [selected, setSelected] = useState(initialValue);
+
+  function handleContinue() {
+    if (!selected || pending) {
+      return;
+    }
+
+    onNext(selected);
+  }
+
   return (
     <section>
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-400">
@@ -51,16 +63,16 @@ export function TaskHabitsStep({
 
       <div className="mt-8 space-y-3">
         {options.map((option) => {
-          const selected = initialValue === option.value;
+          const isSelected = selected === option.value;
 
           return (
             <button
               key={option.value}
               type="button"
               disabled={pending}
-              onClick={() => onNext(option.value)}
+              onClick={() => setSelected(option.value)}
               className={`w-full rounded-2xl border p-4 text-left transition ${
-                selected
+                isSelected
                   ? "border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950"
                   : "border-black/10 bg-white hover:border-black/20 hover:bg-stone-50 dark:border-white/10 dark:bg-stone-900 dark:hover:border-white/20 dark:hover:bg-stone-800"
               }`}
@@ -69,7 +81,7 @@ export function TaskHabitsStep({
 
               <div
                 className={`mt-1 text-xs leading-5 ${
-                  selected
+                  isSelected
                     ? "text-white/65 dark:text-stone-950/60"
                     : "text-stone-500 dark:text-stone-400"
                 }`}
@@ -80,6 +92,21 @@ export function TaskHabitsStep({
           );
         })}
       </div>
+
+      <button
+        type="button"
+        onClick={handleContinue}
+        disabled={!selected || pending}
+        className="mt-6 w-full rounded-xl border bg-stone-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
+      >
+        Continue
+      </button>
+
+      {!selected && (
+        <p className="mt-3 text-center text-[11px] text-stone-400">
+          Choose the option that best describes you.
+        </p>
+      )}
     </section>
   );
 }

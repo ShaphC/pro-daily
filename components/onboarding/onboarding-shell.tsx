@@ -11,7 +11,7 @@ import {
 import type { Onboarding, OnboardingHelpGoal } from "@/types/database";
 import { OnboardingProgress } from "./onboarding-progress";
 import { CommitmentStep } from "./steps/commitment";
-import { CompleteTaskStep } from "./steps/complete-task";
+import { CompletePriorityStep } from "./steps/complete-priority";
 import { AdditionalQuestionsStep } from "./steps/additional-questions";
 import { FinalSnapshotStep } from "./steps/final-snapshot";
 import { GoalCardsStep } from "./steps/goal-cards";
@@ -19,6 +19,7 @@ import { HelpGoalsStep } from "./steps/help-goals";
 import { MakeTasksSmallerStep } from "./steps/make-tasks-smaller";
 import { MomentumStep } from "./steps/momentum";
 import { NameStep } from "./steps/name";
+import { CreateTaskStep } from "./steps/create-task";
 import { NotesStep } from "./steps/notes";
 import { PrioritiesStep } from "./steps/priorities";
 import { ReadyStep } from "./steps/ready";
@@ -30,7 +31,7 @@ import { TasksStep } from "./steps/tasks";
 import { WelcomeStep } from "./steps/welcome";
 import { WhyThreeStep } from "./steps/why-three";
 
-const TOTAL_STEPS = 19;
+const TOTAL_STEPS = 20;
 
 type OnboardingShellProps = {
   initial: Onboarding;
@@ -245,7 +246,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
 
       case 11:
         return (
-          <CompleteTaskStep
+          <CompletePriorityStep
             dayId={dayId}
             onNext={() => handleNext({})}
             pending={pending}
@@ -256,12 +257,27 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
         return <MomentumStep onNext={() => handleNext({})} pending={pending} />;
 
       case 13:
-        return <NotesStep onNext={() => handleNext({})} pending={pending} />;
+        return (
+          <CreateTaskStep
+            dayId={dayId}
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
+        );
 
       case 14:
-        return <RestStep onNext={() => handleNext({})} pending={pending} />;
+        return (
+          <NotesStep
+            dayId={dayId}
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
+        );
 
       case 15:
+        return <RestStep onNext={() => handleNext({})} pending={pending} />;
+
+      case 16:
         return (
           <AdditionalQuestionsStep
             initialValue={onboarding.additional_questions ?? ""}
@@ -274,7 +290,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           />
         );
 
-      case 16:
+      case 17:
         return (
           <ReflectionStep
             name={onboarding.name}
@@ -285,7 +301,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           />
         );
 
-      case 17:
+      case 18:
         return (
           <CommitmentStep
             initialValue={onboarding.commitment ?? ""}
@@ -294,7 +310,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           />
         );
 
-      case 18:
+      case 19:
         return (
           <FinalSnapshotStep
             name={onboarding.name}
@@ -305,7 +321,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           />
         );
 
-      case 19:
+      case 20:
         return <StartTrialStep pending={pending} onComplete={handleComplete} />;
 
       default:
@@ -345,7 +361,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
               </span>
             </div>
 
-            {step > 1 && step < 19 && (
+            {step > 1 && step < TOTAL_STEPS && (
               <button
                 type="button"
                 onClick={() => goToStep(step - 1)}
@@ -372,7 +388,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           </div>
         </div>
 
-        {step < 19 && (
+        {step < TOTAL_STEPS && (
           <footer className="pt-8 text-center">
             <button
               type="button"

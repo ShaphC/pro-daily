@@ -431,3 +431,107 @@ export async function transferPreviousDayContent(
   // new-day carry-forward decision.
   revalidatePath("/today");
 }
+
+export async function getOrCreateOnboardingPriority(
+  dayId: string,
+  text: string,
+) {
+  const supabase = await createClient();
+
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
+    throw new Error("Authentication required");
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from("pro_priorities")
+    .select("*")
+    .eq("day_id", dayId)
+    .eq("user_id", authData.user.id)
+    .eq("text", text)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existing) {
+    return existing;
+  }
+
+  return addPriority(dayId, text);
+}
+
+export async function getPriorities(dayId: string) {
+  const supabase = await createClient();
+
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
+    throw new Error("Authentication required");
+  }
+
+  const { data, error } = await supabase
+    .from("pro_priorities")
+    .select("*")
+    .eq("day_id", dayId)
+    .eq("user_id", authData.user.id)
+    .order("position", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getTasks(dayId: string) {
+  const supabase = await createClient();
+
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
+    throw new Error("Authentication required");
+  }
+
+  const { data, error } = await supabase
+    .from("pro_tasks")
+    .select("*")
+    .eq("day_id", dayId)
+    .eq("user_id", authData.user.id)
+    .order("position", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getNote(dayId: string) {
+  const supabase = await createClient();
+
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
+    throw new Error("Authentication required");
+  }
+
+  const { data, error } = await supabase
+    .from("pro_notes")
+    .select("*")
+    .eq("day_id", dayId)
+    .eq("user_id", authData.user.id)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

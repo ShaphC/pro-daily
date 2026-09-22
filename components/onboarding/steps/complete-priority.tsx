@@ -1,41 +1,73 @@
 "use client";
 
-import { Check, Plus } from "lucide-react";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { Plus } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 
-import { addPriority, togglePriority } from "@/lib/actions/daily";
+import {
+  addPriority,
+  deletePriority,
+  getOrCreateOnboardingPriority,
+  getPriorities,
+  reorderPriorities,
+  togglePriority,
+  updatePriorityText,
+} from "@/lib/actions/daily";
 import type { Priority } from "@/types/database";
+import { SortableRow } from "@/components/daily/sortable-row";
 
 const HARDCODED_PRIORITY = "Write down one thing that you need to finish";
 
-type CompleteTaskStepProps = {
+type CompletePriorityStepProps = {
   dayId: string;
   onNext: () => void;
   pending: boolean;
 };
 
-export function CompleteTaskStep({
+export function CompletePriorityStep({
   dayId,
   onNext,
   pending,
-}: CompleteTaskStepProps) {
+}: CompletePriorityStepProps) {
   const [priorities, setPriorities] = useState<Priority[]>([]);
   const [priorityDraft, setPriorityDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, startSaving] = useTransition();
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+  );
+
   useEffect(() => {
     let cancelled = false;
 
-    async function createStartingPriority() {
+    async function loadPriorities() {
       try {
-        const created = await addPriority(dayId, HARDCODED_PRIORITY);
+        await getOrCreateOnboardingPriority(dayId, HARDCODED_PRIORITY);
 
-        if (!cancelled && created) {
-          setPriorities([created as Priority]);
+        const existing = await getPriorities(dayId);
+
+        if (!cancelled) {
+          setPriorities(existing as Priority[]);
         }
       } catch (error) {
-        console.error("Unable to create onboarding priority:", error);
+        console.error("Unable to load onboarding priorities:", error);
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -43,16 +75,22 @@ export function CompleteTaskStep({
       }
     }
 
-    createStartingPriority();
+    loadPriorities();
 
     return () => {
       cancelled = true;
     };
   }, [dayId]);
 
-  const hardcodedPriority = priorities[0];
+  const hardcodedPriority = priorities.find(
+    (priority) => priority.text === HARDCODED_PRIORITY,
+  );
 
-  const userPriorities = priorities.slice(1);
+  const hardcodedPriorityId = hardcodedPriority?.id;
+
+  const userPriorities = priorities.filter(
+    (priority) => priority.id !== hardcodedPriorityId,
+  );
 
   const hardcodedCompleted = hardcodedPriority?.completed === true;
 
@@ -86,14 +124,10 @@ export function CompleteTaskStep({
     });
   }
 
-  function handleToggleHardcoded(completed: boolean) {
-    if (!hardcodedPriority || saving || pending) {
-      return;
-    }
-
+  async function handleToggle(priority: Priority, completed: boolean) {
     setPriorities((items) =>
       items.map((item) =>
-        item.id === hardcodedPriority.id
+        item.id === priority.id
           ? {
               ...item,
               completed,
@@ -102,24 +136,105 @@ export function CompleteTaskStep({
       ),
     );
 
-    startSaving(async () => {
-      try {
-        await togglePriority(hardcodedPriority.id, completed);
-      } catch (error) {
-        console.error("Unable to update priority:", error);
+    try {
+      await togglePriority(priority.id, completed);
+    } catch (error) {
+      console.error("Unable to update priority:", error);
 
-        setPriorities((items) =>
-          items.map((item) =>
-            item.id === hardcodedPriority.id
-              ? {
-                  ...item,
-                  completed: !completed,
-                }
-              : item,
-          ),
-        );
-      }
-    });
+      setPriorities((items) =>
+        items.map((item) =>
+          item.id === priority.id
+            ? {
+                ...item,
+                completed: !completed,
+              }
+            : item,
+        ),
+      );
+    }
+  }
+
+  async function handleText(priority: Priority, text: string) {
+    setPriorities((items) =>
+      items.map((item) =>
+        item.id === priority.id
+          ? {
+              ...item,
+              text,
+            }
+          : item,
+      ),
+    );
+
+    try {
+      await updatePriorityText(priority.id, text);
+    } catch (error) {
+      console.error("Unable to update priority text:", error);
+
+      setPriorities((items) =>
+        items.map((item) =>
+          item.id === priority.id
+            ? {
+                ...item,
+                text: priority.text,
+              }
+            : item,
+        ),
+      );
+    }
+  }
+
+  async function handleDelete(priority: Priority) {
+    if (priority.id === hardcodedPriorityId) {
+      return;
+    }
+
+    const previous = priorities;
+
+    setPriorities((items) => items.filter((item) => item.id !== priority.id));
+
+    try {
+      await deletePriority(priority.id);
+    } catch (error) {
+      console.error("Unable to delete priority:", error);
+
+      setPriorities(previous);
+    }
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id || saving || pending) {
+      return;
+    }
+
+    const oldIndex = priorities.findIndex(
+      (priority) => priority.id === active.id,
+    );
+
+    const newIndex = priorities.findIndex(
+      (priority) => priority.id === over.id,
+    );
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const reordered = arrayMove(priorities, oldIndex, newIndex);
+
+    setPriorities(reordered);
+
+    try {
+      await reorderPriorities(
+        dayId,
+        reordered.map((priority) => priority.id),
+      );
+    } catch (error) {
+      console.error("Unable to reorder priorities:", error);
+
+      setPriorities(priorities);
+    }
   }
 
   if (loading) {
@@ -134,7 +249,7 @@ export function CompleteTaskStep({
         </h1>
 
         <p className="mt-4 text-sm leading-6 text-stone-500 dark:text-stone-400">
-          Setting up your first priority…
+          Loading your priorities…
         </p>
       </section>
     );
@@ -176,74 +291,36 @@ export function CompleteTaskStep({
           </span>
         </div>
 
-        <div className="grid gap-2">
-          {hardcodedPriority && (
-            <div
-              className={`flex items-center gap-3 rounded-xl border p-3 transition ${
-                hardcodedPriority.completed
-                  ? "border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950"
-                  : "border-black/10 bg-stone-50 dark:border-white/10 dark:bg-stone-950"
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  handleToggleHardcoded(!hardcodedPriority.completed)
-                }
-                disabled={saving || pending}
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition ${
-                  hardcodedPriority.completed
-                    ? "border-white bg-white text-stone-950 dark:border-stone-950 dark:bg-stone-950 dark:text-white"
-                    : "border-stone-300 hover:border-stone-500 dark:border-stone-700 dark:hover:border-stone-500"
-                }`}
-                aria-label={
-                  hardcodedPriority.completed
-                    ? "Mark priority incomplete"
-                    : "Mark priority complete"
-                }
-              >
-                {hardcodedPriority.completed && (
-                  <Check size={14} strokeWidth={3} />
-                )}
-              </button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={priorities.map((priority) => priority.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="grid gap-2">
+              {priorities.map((priority, index) => {
+                const isHardcoded = priority.id === hardcodedPriorityId;
 
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`text-xs font-bold uppercase tracking-[0.14em] ${
-                    hardcodedPriority.completed
-                      ? "text-white/60 dark:text-stone-500"
-                      : "text-stone-400"
-                  }`}
-                >
-                  Priority 1
-                </p>
-
-                <p
-                  className={`mt-1 text-sm font-semibold ${
-                    hardcodedPriority.completed ? "line-through opacity-70" : ""
-                  }`}
-                >
-                  {hardcodedPriority.text}
-                </p>
-              </div>
+                return (
+                  <SortableRow
+                    key={priority.id}
+                    id={priority.id}
+                    text={priority.text}
+                    completed={priority.completed}
+                    emphasis={isHardcoded}
+                    rank={index}
+                    onToggle={(completed) => handleToggle(priority, completed)}
+                    onText={(text) => handleText(priority, text)}
+                    onDelete={() => handleDelete(priority)}
+                  />
+                );
+              })}
             </div>
-          )}
-
-          {userPriorities.map((priority, index) => (
-            <div
-              key={priority.id}
-              className="flex items-center gap-3 rounded-xl border border-black/10 bg-stone-50 px-3 py-3 dark:border-white/10 dark:bg-stone-950"
-            >
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-black/10 text-[10px] font-bold text-stone-500 dark:border-white/10 dark:text-stone-400">
-                {index + 2}
-              </div>
-
-              <p className="min-w-0 flex-1 text-sm font-medium">
-                {priority.text}
-              </p>
-            </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
 
         <div className="mt-3 flex gap-2">
           <input
