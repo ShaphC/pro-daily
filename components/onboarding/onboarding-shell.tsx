@@ -34,9 +34,10 @@ const TOTAL_STEPS = 19;
 
 type OnboardingShellProps = {
   initial: Onboarding;
+  dayId: string;
 };
 
-export function OnboardingShell({ initial }: OnboardingShellProps) {
+export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
   const [onboarding, setOnboarding] = useState(initial);
 
   const [step, setStep] = useState(initial.current_step);
@@ -244,7 +245,11 @@ export function OnboardingShell({ initial }: OnboardingShellProps) {
 
       case 11:
         return (
-          <CompleteTaskStep onNext={() => handleNext({})} pending={pending} />
+          <CompleteTaskStep
+            dayId={dayId}
+            onNext={() => handleNext({})}
+            pending={pending}
+          />
         );
 
       case 12:
