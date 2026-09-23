@@ -40,11 +40,8 @@ type OnboardingShellProps = {
 
 export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
   const [onboarding, setOnboarding] = useState(initial);
-
   const [step, setStep] = useState(initial.current_step);
-
   const [error, setError] = useState("");
-
   const [pending, startTransition] = useTransition();
 
   function goToStep(nextStep: number) {
@@ -361,7 +358,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
               </span>
             </div>
 
-            {step > 1 && step < TOTAL_STEPS && (
+            {step > 1 && (
               <button
                 type="button"
                 onClick={() => goToStep(step - 1)}

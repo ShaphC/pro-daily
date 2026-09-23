@@ -39,7 +39,7 @@ export async function saveOnboardingStep(
     commitment?: string;
   },
 ) {
-  if (nextStep < 1 || nextStep > 19) {
+  if (nextStep < 1 || nextStep > 20) {
     throw new Error("Invalid onboarding step");
   }
 
@@ -112,7 +112,7 @@ export async function saveOnboardingStep(
 }
 
 export async function setOnboardingStep(step: number) {
-  if (step < 1 || step > 19) {
+  if (step < 1 || step > 20) {
     throw new Error("Invalid onboarding step");
   }
 
@@ -140,7 +140,7 @@ export async function completeOnboarding() {
     .update({
       completed: true,
       skipped: false,
-      current_step: 19,
+      current_step: 20,
       completed_at: new Date().toISOString(),
     })
     .eq("user_id", user.id);
