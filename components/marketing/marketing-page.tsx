@@ -85,7 +85,7 @@ function ProductPreview() {
                     </h4>
 
                     <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
-                      Aim for 3–5. Maximum 7. Drag to change priority order.
+                      Keep the important work visible. Maximum 7.
                     </p>
                   </div>
 
@@ -114,8 +114,7 @@ function ProductPreview() {
                   </h4>
 
                   <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
-                    Work through the details. Choose what carries into each new
-                    day.
+                    Break the important work into things you can actually do.
                   </p>
                 </div>
 
@@ -149,7 +148,7 @@ function ProductPreview() {
                 </h4>
 
                 <p className="mt-1 text-[8px] font-medium text-black/45 dark:text-white/40">
-                  Capture what happened while you worked.
+                  Keep the context that would otherwise disappear.
                 </p>
               </div>
 
@@ -158,7 +157,7 @@ function ProductPreview() {
               </div>
 
               <p className="mt-1 text-right text-[7px] font-medium text-black/30 dark:text-white/25">
-                Saved when you leave the notes field.
+                Saved as you work.
               </p>
             </div>
           </div>
@@ -454,7 +453,7 @@ export function MarketingPage() {
   }, []);
 
   const ctaHref = isAuthenticated ? "/today" : "/signup";
-  const ctaLabel = isAuthenticated ? "Go to Today" : "Start for free";
+  const ctaLabel = isAuthenticated ? "Today" : "Start";
 
   return (
     <>
@@ -887,17 +886,17 @@ export function MarketingPage() {
                 </div>
 
                 <h1 className="animate-preview-header text-[3.25rem] font-bold leading-[0.95] tracking-[-0.06em] [animation-delay:120ms] sm:text-6xl lg:text-[4.5rem] xl:text-[5.1rem]">
-                  Plan today.
+                  Know what matters.
                   <br />
                   <span className="text-black/40 dark:text-white/35">
-                    Remember tomorrow.
+                    Remember what happened.
                   </span>
                 </h1>
 
                 <p className="mt-7 max-w-xl animate-preview-section text-base font-medium leading-7 text-black/65 [animation-delay:260ms] dark:text-white/55 sm:text-lg">
-                  CheckMarkr turns your daily paper workflow into a focused
-                  digital workspace for priorities, tasks, notes, and the work
-                  you actually want to remember.
+                  CheckMarkr gives you one focused place to plan your day, work
+                  through what matters, and keep a record of the work you
+                  actually did.
                 </p>
 
                 <div className="mt-9 flex animate-preview-section flex-col items-start gap-3 [animation-delay:380ms] sm:flex-row sm:items-center">
@@ -920,7 +919,7 @@ export function MarketingPage() {
 
                 <div className="mt-5 flex animate-preview-section items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-black/35 [animation-delay:500ms] dark:text-white/30">
                   <Check className="h-3 w-3" />
-                  No complicated setup. Just start your day.
+                  No complicated setup. Just open today's page.
                 </div>
               </div>
 
@@ -936,11 +935,11 @@ export function MarketingPage() {
 
         <section className="glass-divider relative z-10 border-y">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-5 py-5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-black/40 dark:text-white/30 sm:gap-x-6">
-            <span>Choose what matters</span>
+            <span>Decide what matters</span>
             <span>•</span>
-            <span>Work through it</span>
+            <span>Do the work</span>
             <span>•</span>
-            <span>Leave a record</span>
+            <span>Keep the context</span>
             <span>•</span>
             <span>Continue tomorrow</span>
           </div>
@@ -957,32 +956,32 @@ export function MarketingPage() {
               </p>
 
               <h2 className="mt-4 max-w-sm text-3xl font-bold leading-tight tracking-[-0.04em] sm:text-4xl">
-                Your workday shouldn't need a project management system.
+                Your workday needs a record, not another system to manage.
               </h2>
             </div>
 
             <div>
-              <FeatureNumber number="01" title="Choose what matters">
-                Start the day with a short list of priorities. Keep the
-                important work visible instead of burying it underneath dozens
-                of tasks.
+              <FeatureNumber number="01" title="Decide what matters">
+                Start the day with a short list of priorities. Keep the work
+                that matters visible without building an entire project around
+                it.
               </FeatureNumber>
 
-              <FeatureNumber number="02" title="Work underneath them">
-                Tasks give you the room to break work down without confusing
-                everything you need to do with everything that actually matters.
+              <FeatureNumber number="02" title="Work through it">
+                Add the tasks that move those priorities forward. Check them off
+                as the day progresses and keep the details underneath the bigger
+                picture.
               </FeatureNumber>
 
-              <FeatureNumber number="03" title="Leave a record">
-                Notes capture the context that usually disappears at the end of
-                the day — decisions, observations, progress, and unfinished
-                thoughts.
+              <FeatureNumber number="03" title="Keep the context">
+                Use notes to capture decisions, observations, progress, and
+                anything else worth remembering after the day is over.
               </FeatureNumber>
 
-              <FeatureNumber number="04" title="Come back tomorrow">
-                When a new day begins, choose what unfinished work you want to
-                bring forward. Your history stays intact while your next day
-                starts exactly how you want it.
+              <FeatureNumber number="04" title="Continue when you're ready">
+                Your previous days stay intact. When there is unfinished work
+                worth bringing forward, CheckMarkr lets you decide what comes
+                with you into the next day.
               </FeatureNumber>
             </div>
           </div>
@@ -1001,8 +1000,8 @@ export function MarketingPage() {
 
               <p className="mt-5 max-w-xl text-base font-medium leading-7 text-black/60 dark:text-white/50">
                 The hierarchy is deliberate. Decide what matters first. Then
-                figure out what needs doing. Then capture whatever happens along
-                the way.
+                work through the details. Then capture what happened so the day
+                doesn't disappear when you close the page.
               </p>
             </div>
 
@@ -1018,12 +1017,12 @@ export function MarketingPage() {
                 </p>
 
                 <h3 className="mt-3 text-xl font-bold tracking-[-0.03em]">
-                  Pick the few things that matter.
+                  Choose the work that matters.
                 </h3>
 
                 <p className="mt-4 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                  Up to seven priorities. Your top three define whether the day
-                  was accomplished.
+                  Keep up to seven priorities visible and put the most important
+                  work first.
                 </p>
               </div>
 
@@ -1038,12 +1037,12 @@ export function MarketingPage() {
                 </p>
 
                 <h3 className="mt-3 text-xl font-bold tracking-[-0.03em]">
-                  Turn priorities into movement.
+                  Turn priorities into action.
                 </h3>
 
                 <p className="mt-4 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                  Keep the detailed to-do list separate from the work that
-                  defines the day.
+                  Break important work into concrete tasks without letting the
+                  to-do list become the whole system.
                 </p>
               </div>
 
@@ -1058,12 +1057,12 @@ export function MarketingPage() {
                 </p>
 
                 <h3 className="mt-3 text-xl font-bold tracking-[-0.03em]">
-                  Keep the context.
+                  Don't lose the context.
                 </h3>
 
                 <p className="mt-4 text-sm font-medium leading-6 text-black/60 dark:text-white/50">
-                  A flexible space for everything worth remembering from the
-                  workday.
+                  Capture the things that don't belong in a checkbox but still
+                  matter later.
                 </p>
               </div>
             </div>
@@ -1096,12 +1095,12 @@ export function MarketingPage() {
                   {
                     icon: Minus,
                     title: "No endless project setup",
-                    text: "Open the page and start working. The structure is already there.",
+                    text: "Open today's page and start working. The structure is already there.",
                   },
                   {
                     icon: Minus,
                     title: "No productivity theater",
-                    text: "The goal isn't to maintain a perfect system. It's to do meaningful work and remember what happened.",
+                    text: "The goal isn't to maintain a perfect system. It's to do meaningful work and keep a useful record of it.",
                   },
                   {
                     icon: Check,
@@ -1150,9 +1149,10 @@ export function MarketingPage() {
                 </h2>
 
                 <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                  Previous work stays attached to its original day. When you
-                  start a new day, you decide which incomplete priorities,
-                  tasks, or notes are worth bringing forward.
+                  Every day stays attached to its own history. When the next day
+                  begins, you decide whether unfinished priorities, tasks, or
+                  notes are worth bringing forward. Nothing moves unless you
+                  choose it.
                 </p>
 
                 <Link
@@ -1226,8 +1226,9 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                CheckMarkr is still being shaped around real usage. Start with
-                the core daily workflow while the rest of the product develops.
+                Start with the core daily workflow. We're building the rest of
+                CheckMarkr around what actually helps people plan, work, and
+                remember.
               </p>
             </div>
 
@@ -1242,7 +1243,7 @@ export function MarketingPage() {
                 </h3>
 
                 <p className="mt-2 text-sm font-medium text-black/50 dark:text-white/40">
-                  The daily workflow, without the clutter.
+                  The focused daily workflow.
                 </p>
 
                 <div className="mt-7 border-t border-black/8 pt-6 dark:border-white/8">
@@ -1259,7 +1260,7 @@ export function MarketingPage() {
 
                     <div className="flex gap-3">
                       <Check className="h-4 w-4 shrink-0" />
-                      Choose what carries forward
+                      Intentional carry-forward
                     </div>
 
                     <div className="flex gap-3">
@@ -1294,8 +1295,8 @@ export function MarketingPage() {
                 </h3>
 
                 <p className="mt-2 text-sm font-medium text-white/55 dark:text-black/50">
-                  Pricing and premium features will be finalized after early
-                  users shape the product.
+                  Premium features will take shape around what early users
+                  actually need.
                 </p>
 
                 <div className="mt-7 border-t border-white/10 pt-6 dark:border-black/10">
@@ -1349,8 +1350,8 @@ export function MarketingPage() {
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Once people start using CheckMarkr, this is where their
-                experiences will live.
+                As people use CheckMarkr, this is where their experiences with
+                the daily workflow will live.
               </p>
             </div>
 
@@ -1407,12 +1408,12 @@ export function MarketingPage() {
               </p>
 
               <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] sm:text-5xl">
-                Start with a better daily page.
+                A better way to keep track of your work.
               </h2>
 
               <p className="mt-5 text-sm font-medium leading-7 text-black/60 dark:text-white/50">
-                Capture what matters. Work through it. Leave a record. Build a
-                system that gets better because you actually use it.
+                Decide what matters. Work through it. Keep the context. Then
+                come back tomorrow with a clear record of where you left off.
               </p>
 
               <Link
