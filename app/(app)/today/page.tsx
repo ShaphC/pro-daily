@@ -12,7 +12,9 @@ export default async function TodayPage() {
 
   const { data } = await supabase.auth.getUser();
 
-  if (!data.user) redirect("/login");
+  if (!data.user) {
+    redirect("/login");
+  }
 
   const settings = await getOrCreateSettings(data.user.id);
 

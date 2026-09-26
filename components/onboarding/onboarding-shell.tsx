@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 
 import {
-  completeOnboarding,
   saveOnboardingStep,
   setOnboardingStep,
   skipOnboarding,
@@ -119,28 +118,6 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
           error instanceof Error
             ? error.message
             : "Unable to save your progress.",
-        );
-      }
-    });
-  }
-
-  function handleComplete() {
-    if (pending) {
-      return;
-    }
-
-    setError("");
-
-    startTransition(async () => {
-      try {
-        await completeOnboarding();
-
-        window.location.href = "/today";
-      } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Unable to finish onboarding.",
         );
       }
     });
@@ -319,7 +296,7 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
         );
 
       case 20:
-        return <StartTrialStep pending={pending} onComplete={handleComplete} />;
+        return <StartTrialStep pending={pending} />;
 
       default:
         return (

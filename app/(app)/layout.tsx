@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
-import { getOrCreateSettings } from "@/lib/services/settings";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
-import { TimezoneSync } from "@/components/theme/timezone-sync";
 import { ThemeSync } from "@/components/theme/theme-sync";
+import { TimezoneSync } from "@/components/theme/timezone-sync";
+import { createClient } from "@/lib/supabase/server";
+import { getBillingAccess } from "@/lib/services/billing";
 import { dateInTimezone } from "@/lib/services/daily";
+import { getOrCreateSettings } from "@/lib/services/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,12 @@ export default async function AppLayout({
 
   if (!data.user) {
     redirect("/login");
+  }
+
+  const billing = await getBillingAccess(data.user.id);
+
+  if (!billing.hasAccess) {
+    redirect("/pricing");
   }
 
   const settings = await getOrCreateSettings(data.user.id);
@@ -39,7 +46,6 @@ export default async function AppLayout({
   return (
     <>
       <ThemeSync theme={settings.theme} />
-
       <TimezoneSync storedTimezone={settings.timezone} />
 
       <div className="min-h-dvh">

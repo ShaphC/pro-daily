@@ -128,8 +128,8 @@ export async function POST(request: Request) {
           plan,
         },
       },
-      success_url: `${origin}/today?checkout=success`,
-      cancel_url: `${origin}/pricing?checkout=cancelled`,
+      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/onboarding?checkout=cancelled`,
       metadata: {
         supabase_user_id: user.id,
         plan,

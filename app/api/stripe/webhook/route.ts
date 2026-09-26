@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -10,6 +11,147 @@ if (!webhookSecret) {
 }
 
 const stripeWebhookSecret: string = webhookSecret;
+
+function getCustomerId(subscription: Stripe.Subscription) {
+  return typeof subscription.customer === "string"
+    ? subscription.customer
+    : subscription.customer.id;
+}
+
+function getPlan(subscription: Stripe.Subscription) {
+  const subscriptionItem = subscription.items.data[0];
+
+  if (!subscriptionItem) {
+    return null;
+  }
+
+  const interval = subscriptionItem.price.recurring?.interval;
+
+  if (interval === "month") {
+    return "monthly";
+  }
+
+  if (interval === "year") {
+    return "yearly";
+  }
+
+  return null;
+}
+
+function getCurrentPeriodEnd(subscription: Stripe.Subscription) {
+  const subscriptionItem = subscription.items.data[0];
+
+  if (!subscriptionItem) {
+    return null;
+  }
+
+  const currentPeriodEnd = subscriptionItem.current_period_end;
+
+  return typeof currentPeriodEnd === "number"
+    ? new Date(currentPeriodEnd * 1000).toISOString()
+    : null;
+}
+
+function getTrialEnd(subscription: Stripe.Subscription) {
+  return typeof subscription.trial_end === "number"
+    ? new Date(subscription.trial_end * 1000).toISOString()
+    : null;
+}
+
+async function getSupabaseUserId(subscription: Stripe.Subscription) {
+  const metadataUserId = subscription.metadata?.supabase_user_id;
+
+  if (metadataUserId) {
+    return metadataUserId;
+  }
+
+  const customerId = getCustomerId(subscription);
+
+  const { data, error } = await supabaseAdmin
+    .from("pro_user_settings")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.user_id ?? null;
+}
+
+async function syncSubscription(subscription: Stripe.Subscription) {
+  const customerId = getCustomerId(subscription);
+  const supabaseUserId = await getSupabaseUserId(subscription);
+
+  if (!supabaseUserId) {
+    throw new Error(
+      `Unable to determine Supabase user for subscription ${subscription.id}`,
+    );
+  }
+
+  const plan = getPlan(subscription);
+
+  if (!plan) {
+    throw new Error(
+      `Unable to determine plan for subscription ${subscription.id}`,
+    );
+  }
+
+  const { error } = await supabaseAdmin.from("pro_user_settings").upsert(
+    {
+      user_id: supabaseUserId,
+      stripe_customer_id: customerId,
+      subscription_id: subscription.id,
+      subscription_status: subscription.status,
+      subscription_plan: plan,
+      subscription_current_period_end: getCurrentPeriodEnd(subscription),
+      subscription_trial_end: getTrialEnd(subscription),
+    },
+    {
+      onConflict: "user_id",
+    },
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  console.log("Stripe subscription synced:", {
+    userId: supabaseUserId,
+    subscriptionId: subscription.id,
+    status: subscription.status,
+    plan,
+  });
+}
+
+async function syncDeletedSubscription(subscription: Stripe.Subscription) {
+  const supabaseUserId = await getSupabaseUserId(subscription);
+
+  if (!supabaseUserId) {
+    throw new Error(
+      `Unable to determine Supabase user for deleted subscription ${subscription.id}`,
+    );
+  }
+
+  const { error } = await supabaseAdmin
+    .from("pro_user_settings")
+    .update({
+      subscription_status: "canceled",
+      subscription_current_period_end: getCurrentPeriodEnd(subscription),
+      subscription_trial_end: getTrialEnd(subscription),
+    })
+    .eq("user_id", supabaseUserId);
+
+  if (error) {
+    throw error;
+  }
+
+  console.log("Stripe subscription deleted:", {
+    userId: supabaseUserId,
+    subscriptionId: subscription.id,
+  });
+}
 
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
@@ -45,187 +187,31 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const subscription = event.data.object;
-
-        const customerId =
-          typeof subscription.customer === "string"
-            ? subscription.customer
-            : subscription.customer?.id;
-
-        if (!customerId) {
-          console.error("Missing Stripe customer ID:", subscription.id);
-
-          return NextResponse.json(
-            { error: "Missing Stripe customer ID" },
-            { status: 500 },
-          );
-        }
-
-        const supabaseUserId = subscription.metadata?.supabase_user_id;
-
-        if (!supabaseUserId) {
-          console.error(
-            "Missing supabase_user_id in subscription metadata:",
-            subscription.id,
-          );
-
-          return NextResponse.json(
-            { error: "Missing Supabase user ID" },
-            { status: 500 },
-          );
-        }
-
-        const subscriptionItem = subscription.items.data[0];
-
-        if (!subscriptionItem) {
-          console.error(
-            "Subscription has no subscription items:",
-            subscription.id,
-          );
-
-          return NextResponse.json(
-            { error: "Subscription has no items" },
-            { status: 500 },
-          );
-        }
-
-        const interval = subscriptionItem.price.recurring?.interval;
-
-        const plan =
-          interval === "year"
-            ? "yearly"
-            : interval === "month"
-              ? "monthly"
-              : null;
-
-        if (!plan) {
-          console.error(
-            "Unable to determine subscription plan:",
-            subscription.id,
-          );
-
-          return NextResponse.json(
-            { error: "Unable to determine subscription plan" },
-            { status: 500 },
-          );
-        }
-
-        const currentPeriodEnd = subscriptionItem.current_period_end;
-
-        const currentPeriodEndIso =
-          typeof currentPeriodEnd === "number"
-            ? new Date(currentPeriodEnd * 1000).toISOString()
-            : null;
-
-        const trialEnd = subscription.trial_end;
-
-        const trialEndIso =
-          typeof trialEnd === "number"
-            ? new Date(trialEnd * 1000).toISOString()
-            : null;
-
-        const { error } = await supabaseAdmin.from("pro_user_settings").upsert(
-          {
-            user_id: supabaseUserId,
-            stripe_customer_id: customerId,
-            subscription_id: subscription.id,
-            subscription_status: subscription.status,
-            subscription_plan: plan,
-            subscription_current_period_end: currentPeriodEndIso,
-            subscription_trial_end: trialEndIso,
-          },
-          {
-            onConflict: "user_id",
-          },
-        );
-
-        if (error) {
-          console.error("Failed to sync subscription to Supabase:", error);
-
-          return NextResponse.json(
-            { error: "Failed to sync subscription" },
-            { status: 500 },
-          );
-        }
-
-        console.log("Subscription synced:", {
-          userId: supabaseUserId,
-          subscriptionId: subscription.id,
-          status: subscription.status,
-          plan,
-        });
-
+      case "customer.subscription.updated":
+        await syncSubscription(event.data.object);
         break;
-      }
 
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object;
-
-        const supabaseUserId = subscription.metadata?.supabase_user_id;
-
-        if (!supabaseUserId) {
-          console.error(
-            "Missing supabase_user_id in deleted subscription metadata:",
-            subscription.id,
-          );
-
-          return NextResponse.json(
-            { error: "Missing Supabase user ID" },
-            { status: 500 },
-          );
-        }
-
-        const { error } = await supabaseAdmin
-          .from("pro_user_settings")
-          .update({
-            subscription_status: "canceled",
-          })
-          .eq("user_id", supabaseUserId);
-
-        if (error) {
-          console.error("Failed to sync canceled subscription:", error);
-
-          return NextResponse.json(
-            { error: "Failed to sync canceled subscription" },
-            { status: 500 },
-          );
-        }
-
-        console.log("Subscription canceled:", subscription.id);
-
+      case "customer.subscription.deleted":
+        await syncDeletedSubscription(event.data.object);
         break;
-      }
 
-      case "checkout.session.completed": {
-        const session = event.data.object;
-
-        console.log("Checkout completed:", session.id);
-
+      case "checkout.session.completed":
+        console.log("Stripe Checkout completed:", event.data.object.id);
         break;
-      }
 
-      case "invoice.paid": {
-        const invoice = event.data.object;
-
-        console.log("Invoice paid:", invoice.id);
-
+      case "invoice.paid":
+        console.log("Stripe invoice paid:", event.data.object.id);
         break;
-      }
 
-      case "invoice.payment_failed": {
-        const invoice = event.data.object;
-
-        console.log("Invoice payment failed:", invoice.id);
-
+      case "invoice.payment_failed":
+        console.log("Stripe invoice payment failed:", event.data.object.id);
         break;
-      }
 
       default:
         console.log("Unhandled Stripe event:", event.type);
     }
   } catch (error) {
-    console.error("Stripe webhook processing error:", error);
+    console.error(`Stripe webhook processing failed for ${event.type}:`, error);
 
     return NextResponse.json(
       { error: "Webhook processing failed" },
