@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  getBillingAccess,
+  startAppTrialIfNeeded,
+} from "@/lib/services/billing";
 import type { Onboarding } from "@/types/database";
 
 export async function getOrCreateOnboarding(
@@ -47,7 +51,15 @@ export async function getOrCreateOnboarding(
 
 export async function getPostAuthPath(
   userId: string,
-): Promise<"/onboarding" | "/today"> {
+): Promise<"/onboarding" | "/today" | "/pricing"> {
+  await startAppTrialIfNeeded(userId);
+
+  const billing = await getBillingAccess(userId);
+
+  if (!billing.hasAccess) {
+    return "/pricing";
+  }
+
   const onboarding = await getOrCreateOnboarding(userId);
 
   if (!onboarding.completed && !onboarding.skipped) {

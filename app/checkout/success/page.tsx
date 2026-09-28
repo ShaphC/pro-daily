@@ -37,6 +37,7 @@ export default async function CheckoutSuccessPage({
     session = await stripe.checkout.sessions.retrieve(sessionId);
   } catch (error) {
     console.error("Unable to retrieve Stripe Checkout session:", error);
+
     redirect("/pricing");
   }
 
@@ -111,23 +112,20 @@ export default async function CheckoutSuccessPage({
     throw settingsError;
   }
 
-  const { error: onboardingError } = await supabase
+  const { data: onboarding, error: onboardingError } = await supabase
     .from("pro_onboarding")
-    .update({
-      completed: true,
-      skipped: false,
-      current_step: 20,
-      completed_at: new Date().toISOString(),
-    })
-    .eq("user_id", user.id);
+    .select("completed, skipped, current_step")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   if (onboardingError) {
-    console.error(
-      "Unable to complete onboarding after Checkout:",
-      onboardingError,
-    );
+    console.error("Unable to load onboarding after Checkout:", onboardingError);
 
     throw onboardingError;
+  }
+
+  if (onboarding && !onboarding.completed && !onboarding.skipped) {
+    redirect("/onboarding");
   }
 
   redirect("/today");

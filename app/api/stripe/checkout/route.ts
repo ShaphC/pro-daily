@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+
 import { stripe } from "@/lib/stripe/server";
 import { STRIPE_PRICES } from "@/lib/stripe/config";
-import { STRIPE_TRIAL_DAYS, type StripePlan } from "@/lib/stripe/plans";
+import type { StripePlan } from "@/lib/stripe/plans";
 import { createClient } from "@/lib/supabase/server";
 
 function isStripePlan(value: unknown): value is StripePlan {
@@ -36,7 +37,12 @@ export async function POST(request: Request) {
     const { data: settings, error: settingsError } = await supabase
       .from("pro_user_settings")
       .select(
-        "stripe_customer_id, subscription_id, subscription_status, billing_access_override",
+        `
+            stripe_customer_id,
+            subscription_id,
+            subscription_status,
+            billing_access_override
+          `,
       )
       .eq("user_id", user.id)
       .maybeSingle();
@@ -50,8 +56,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Complimentary/beta users with an access override
-    // should never need to create a Stripe subscription.
     if (settings?.billing_access_override) {
       return NextResponse.json(
         {
@@ -61,7 +65,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Prevent creating a second subscription.
     const existingSubscription =
       settings?.subscription_status === "active" ||
       settings?.subscription_status === "trialing" ||
@@ -122,14 +125,13 @@ export async function POST(request: Request) {
         },
       ],
       subscription_data: {
-        trial_period_days: STRIPE_TRIAL_DAYS,
         metadata: {
           supabase_user_id: user.id,
           plan,
         },
       },
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/onboarding?checkout=cancelled`,
+      cancel_url: `${origin}/pricing?checkout=cancelled`,
       metadata: {
         supabase_user_id: user.id,
         plan,

@@ -5,18 +5,36 @@ import { useState } from "react";
 
 type StripePlan = "monthly" | "yearly";
 
-type StartTrialStepProps = {
-  pending: boolean;
+type BillingState = {
+  hasOverride: boolean;
+  isAppTrial: boolean;
+  isStripeTrial: boolean;
+  isSubscribed: boolean;
+  appTrialEnd: string | null;
+  subscriptionTrialEnd: string | null;
+  subscriptionPlan: string | null;
 };
 
-export function StartTrialStep({ pending }: StartTrialStepProps) {
+type StartTrialStepProps = {
+  pending: boolean;
+  billing: BillingState;
+  onComplete: () => void;
+};
+
+export function StartTrialStep({
+  pending,
+  billing,
+  onComplete,
+}: StartTrialStepProps) {
   const [plan, setPlan] = useState<StripePlan>("yearly");
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [error, setError] = useState("");
 
   const isPending = pending || checkoutPending;
 
-  async function handleStartTrial() {
+  const alreadyHasPaidAccess = billing.hasOverride || billing.isSubscribed;
+
+  async function handleCheckout() {
     if (isPending) {
       return;
     }
@@ -62,6 +80,34 @@ export function StartTrialStep({ pending }: StartTrialStepProps) {
     }
   }
 
+  if (alreadyHasPaidAccess) {
+    return (
+      <section className="text-center">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-400">
+          You're ready
+        </p>
+
+        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+          Your setup is complete.
+        </h1>
+
+        <p className="mx-auto mt-5 max-w-md text-sm leading-6 text-stone-500 dark:text-stone-400">
+          You&apos;re ready to start using CheckMarkr to plan your day, keep
+          track of your work, and carry what matters forward.
+        </p>
+
+        <button
+          type="button"
+          onClick={onComplete}
+          disabled={isPending}
+          className="mt-8 w-full rounded-xl border bg-stone-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
+        >
+          {pending ? "Finishing setup..." : "Go to CheckMarkr"}
+        </button>
+      </section>
+    );
+  }
+
   return (
     <section className="text-center">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-400">
@@ -69,12 +115,12 @@ export function StartTrialStep({ pending }: StartTrialStepProps) {
       </p>
 
       <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
-        Start your 3-day free trial.
+        Your CheckMarkr setup is complete.
       </h1>
 
       <p className="mx-auto mt-5 max-w-md text-sm leading-6 text-stone-500 dark:text-stone-400">
-        Your CheckMarkr workspace is ready. Choose the plan you'd like to
-        continue with after your free trial.
+        Your free trial is already active. You can keep using CheckMarkr without
+        adding payment details, or choose a plan now.
       </p>
 
       <div className="mx-auto mt-8 max-w-md">
@@ -112,7 +158,7 @@ export function StartTrialStep({ pending }: StartTrialStepProps) {
             <TrialFeature text="Daily priorities, tasks, and notes" />
             <TrialFeature text="Carry unfinished work into the next day" />
             <TrialFeature text="Keep a history of your work" />
-            <TrialFeature text="Full CheckMarkr access during your trial" />
+            <TrialFeature text="Full CheckMarkr access" />
           </div>
         </div>
 
@@ -124,19 +170,30 @@ export function StartTrialStep({ pending }: StartTrialStepProps) {
 
         <button
           type="button"
-          onClick={handleStartTrial}
+          onClick={handleCheckout}
           disabled={isPending}
           className="mt-6 w-full rounded-xl border bg-stone-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
         >
           {checkoutPending
             ? "Opening secure checkout..."
-            : "Start 3-day free trial"}
+            : plan === "yearly"
+              ? "Choose yearly"
+              : "Choose monthly"}
         </button>
 
-        <p className="mt-3 text-[11px] leading-5 text-stone-400">
-          You'll continue to Stripe to securely add your payment method. You
-          won't be charged today. Your selected plan begins after your 3-day
-          trial unless you cancel.
+        <button
+          type="button"
+          onClick={onComplete}
+          disabled={isPending}
+          className="mt-3 w-full rounded-xl border border-stone-200 bg-white px-5 py-3.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+        >
+          {pending ? "Finishing setup..." : "Continue free trial"}
+        </button>
+
+        <p className="mt-4 text-[11px] leading-5 text-stone-400">
+          No card is required for your 3-day free trial. If you choose a paid
+          plan now, you&apos;ll continue to Stripe to securely enter your
+          payment information.
         </p>
 
         <p className="mt-1 text-[10px] text-stone-400">Prices shown in USD.</p>

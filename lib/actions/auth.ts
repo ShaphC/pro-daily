@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { startAppTrialIfNeeded } from "@/lib/services/billing";
 import { getPostAuthPath } from "@/lib/services/onboarding";
 
 export async function signIn(formData: FormData) {
@@ -30,7 +31,9 @@ export async function signIn(formData: FormData) {
           user_id: data.user.id,
           timezone,
         },
-        { onConflict: "user_id" },
+        {
+          onConflict: "user_id",
+        },
       );
 
     if (settingsError) {
@@ -75,12 +78,16 @@ export async function signUp(formData: FormData) {
           user_id: data.user.id,
           timezone,
         },
-        { onConflict: "user_id" },
+        {
+          onConflict: "user_id",
+        },
       );
 
     if (settingsError) {
       console.error("Unable to save user settings:", settingsError);
     }
+
+    await startAppTrialIfNeeded(data.user.id);
 
     revalidatePath("/", "layout");
 

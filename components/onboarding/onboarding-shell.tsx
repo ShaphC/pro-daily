@@ -3,22 +3,23 @@
 import { useState, useTransition } from "react";
 
 import {
+  completeOnboarding,
   saveOnboardingStep,
   setOnboardingStep,
   skipOnboarding,
 } from "@/lib/actions/onboarding";
 import type { Onboarding, OnboardingHelpGoal } from "@/types/database";
 import { OnboardingProgress } from "./onboarding-progress";
+import { AdditionalQuestionsStep } from "./steps/additional-questions";
 import { CommitmentStep } from "./steps/commitment";
 import { CompletePriorityStep } from "./steps/complete-priority";
-import { AdditionalQuestionsStep } from "./steps/additional-questions";
+import { CreateTaskStep } from "./steps/create-task";
 import { FinalSnapshotStep } from "./steps/final-snapshot";
 import { GoalCardsStep } from "./steps/goal-cards";
 import { HelpGoalsStep } from "./steps/help-goals";
 import { MakeTasksSmallerStep } from "./steps/make-tasks-smaller";
 import { MomentumStep } from "./steps/momentum";
 import { NameStep } from "./steps/name";
-import { CreateTaskStep } from "./steps/create-task";
 import { NotesStep } from "./steps/notes";
 import { PrioritiesStep } from "./steps/priorities";
 import { ReadyStep } from "./steps/ready";
@@ -32,12 +33,27 @@ import { WhyThreeStep } from "./steps/why-three";
 
 const TOTAL_STEPS = 20;
 
+type OnboardingBilling = {
+  hasOverride: boolean;
+  isAppTrial: boolean;
+  isStripeTrial: boolean;
+  isSubscribed: boolean;
+  appTrialEnd: string | null;
+  subscriptionTrialEnd: string | null;
+  subscriptionPlan: string | null;
+};
+
 type OnboardingShellProps = {
   initial: Onboarding;
   dayId: string;
+  billing: OnboardingBilling;
 };
 
-export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
+export function OnboardingShell({
+  initial,
+  dayId,
+  billing,
+}: OnboardingShellProps) {
   const [onboarding, setOnboarding] = useState(initial);
   const [step, setStep] = useState(initial.current_step);
   const [error, setError] = useState("");
@@ -144,6 +160,35 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Unable to skip onboarding.",
+        );
+      }
+    });
+  }
+
+  function handleComplete() {
+    if (pending) {
+      return;
+    }
+
+    setError("");
+
+    startTransition(async () => {
+      try {
+        await completeOnboarding();
+
+        setOnboarding((current) => ({
+          ...current,
+          completed: true,
+          skipped: false,
+          current_step: TOTAL_STEPS,
+        }));
+
+        window.location.href = "/today";
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to complete onboarding.",
         );
       }
     });
@@ -296,7 +341,13 @@ export function OnboardingShell({ initial, dayId }: OnboardingShellProps) {
         );
 
       case 20:
-        return <StartTrialStep pending={pending} />;
+        return (
+          <StartTrialStep
+            pending={pending}
+            billing={billing}
+            onComplete={handleComplete}
+          />
+        );
 
       default:
         return (
