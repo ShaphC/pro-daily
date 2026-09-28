@@ -8,6 +8,7 @@ export type BillingAccess = {
   isAppTrial: boolean;
   isStripeTrial: boolean;
   isSubscribed: boolean;
+  isPaidThroughPeriod: boolean;
   appTrialStartedAt: string | null;
   appTrialEnd: string | null;
   subscriptionStatus: string | null;
@@ -119,6 +120,8 @@ export async function getBillingAccess(userId: string): Promise<BillingAccess> {
 
   const subscriptionTrialEnd = data?.subscription_trial_end ?? null;
 
+  const currentPeriodEnd = data?.subscription_current_period_end ?? null;
+
   const isAppTrial =
     appTrialEnd !== null && new Date(appTrialEnd).getTime() > now;
 
@@ -129,17 +132,28 @@ export async function getBillingAccess(userId: string): Promise<BillingAccess> {
 
   const isSubscribed = subscriptionStatus === "active";
 
+  const isPaidThroughPeriod =
+    subscriptionStatus === "canceled" &&
+    currentPeriodEnd !== null &&
+    new Date(currentPeriodEnd).getTime() > now;
+
   return {
-    hasAccess: hasOverride || isAppTrial || isStripeTrial || isSubscribed,
+    hasAccess:
+      hasOverride ||
+      isAppTrial ||
+      isStripeTrial ||
+      isSubscribed ||
+      isPaidThroughPeriod,
     hasOverride,
     isAppTrial,
     isStripeTrial,
     isSubscribed,
+    isPaidThroughPeriod,
     appTrialStartedAt,
     appTrialEnd,
     subscriptionStatus,
     subscriptionPlan: data?.subscription_plan ?? null,
     subscriptionTrialEnd,
-    currentPeriodEnd: data?.subscription_current_period_end ?? null,
+    currentPeriodEnd,
   };
 }
