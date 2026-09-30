@@ -1,18 +1,29 @@
-import { Clock3, Palette, SlidersHorizontal } from "lucide-react";
+import { Clock3, LockKeyhole, Palette, SlidersHorizontal } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { CarryForwardSettings } from "@/components/settings/carry-forward-settings";
 import { ThemeSelector } from "@/components/theme/theme-selector";
+import { changePassword } from "@/lib/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateSettings } from "@/lib/services/settings";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    error?: string;
+    message?: string;
+  }>;
+}) {
   const supabase = await createClient();
 
   const { data } = await supabase.auth.getUser();
 
-  if (!data.user) redirect("/login");
+  if (!data.user) {
+    redirect("/login");
+  }
 
+  const params = await searchParams;
   const settings = await getOrCreateSettings(data.user.id);
 
   return (
@@ -21,17 +32,6 @@ export default async function SettingsPage() {
 
       <div className="relative">
         <div className="mb-8">
-          {/* <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05]">
-            <SlidersHorizontal
-              size={18}
-              className="text-stone-700 dark:text-stone-300"
-            />
-          </div>
-
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-400 dark:text-stone-500">
-            Preferences
-          </p> */}
-
           <h1 className="mt-1.5 text-3xl font-semibold tracking-[-0.035em] text-stone-950 dark:text-white sm:text-4xl">
             Settings
           </h1>
@@ -40,6 +40,18 @@ export default async function SettingsPage() {
             Customize how CheckMarkr works for you.
           </p>
         </div>
+
+        {params.error && (
+          <p className="mb-5 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+            {params.error}
+          </p>
+        )}
+
+        {params.message && (
+          <p className="mb-5 rounded-xl bg-stone-100 p-3 text-sm text-stone-700 dark:bg-stone-800 dark:text-stone-200">
+            {params.message}
+          </p>
+        )}
 
         <div className="grid gap-5">
           <section className="glass glass-highlight rounded-3xl p-5 sm:p-6">
@@ -94,6 +106,78 @@ export default async function SettingsPage() {
                 initialTasks={settings.carry_forward_tasks}
                 initialNotes={settings.carry_forward_notes}
               />
+            </div>
+          </section>
+
+          <section className="glass glass-highlight rounded-3xl p-5 sm:p-6">
+            <div className="relative z-10">
+              <div className="mb-5 flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-black/[0.08] bg-white/50 dark:border-white/[0.08] dark:bg-white/[0.04]">
+                  <LockKeyhole
+                    size={17}
+                    className="text-stone-600 dark:text-stone-300"
+                  />
+                </div>
+
+                <div>
+                  <h2 className="font-semibold text-stone-950 dark:text-white">
+                    Password
+                  </h2>
+
+                  <p className="mt-1 text-sm leading-6 text-stone-500 dark:text-stone-400">
+                    Change the password you use to sign in to CheckMarkr.
+                  </p>
+                </div>
+              </div>
+
+              <form action={changePassword} className="grid max-w-md gap-4">
+                <div>
+                  <label
+                    htmlFor="settings-password"
+                    className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
+                  >
+                    New password
+                  </label>
+
+                  <input
+                    id="settings-password"
+                    name="password"
+                    type="password"
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                    className="w-full rounded-xl border border-stone-200 bg-white/60 px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-400 dark:border-stone-700 dark:bg-stone-950/60 dark:text-white dark:focus:border-stone-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="settings-confirm-password"
+                    className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
+                  >
+                    Confirm new password
+                  </label>
+
+                  <input
+                    id="settings-confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                    className="w-full rounded-xl border border-stone-200 bg-white/60 px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-400 dark:border-stone-700 dark:bg-stone-950/60 dark:text-white dark:focus:border-stone-500"
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center rounded-xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 dark:bg-white dark:text-stone-950 dark:hover:bg-stone-200"
+                  >
+                    Change password
+                  </button>
+                </div>
+              </form>
             </div>
           </section>
 

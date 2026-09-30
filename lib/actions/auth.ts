@@ -107,15 +107,115 @@ export async function requestPasswordReset(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const origin = String(formData.get("origin") ?? "");
 
+  if (!email) {
+    redirect(
+      `/reset-password?error=${encodeURIComponent(
+        "Please enter your email address.",
+      )}`,
+    );
+  }
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/settings`,
+    redirectTo: `${origin}/auth/recovery`,
   });
 
   if (error) {
     redirect(`/reset-password?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect("/login?message=Password%20reset%20email%20sent.");
+  redirect(
+    "/login?message=Password%20reset%20email%20sent.%20Check%20your%20inbox.",
+  );
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (password.length < 8) {
+    redirect(
+      `/update-password?error=${encodeURIComponent(
+        "Password must be at least 8 characters.",
+      )}`,
+    );
+  }
+
+  if (password !== confirmPassword) {
+    redirect(
+      `/update-password?error=${encodeURIComponent("Passwords do not match.")}`,
+    );
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(
+      `/login?error=${encodeURIComponent(
+        "Your password reset session has expired. Please request a new link.",
+      )}`,
+    );
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    redirect(`/update-password?error=${encodeURIComponent(error.message)}`);
+  }
+
+  await supabase.auth.signOut();
+
+  revalidatePath("/", "layout");
+
+  redirect(
+    "/login?message=Password%20updated.%20You%20can%20now%20log%20in%20with%20your%20new%20password.",
+  );
+}
+
+export async function changePassword(formData: FormData) {
+  const supabase = await createClient();
+
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (password.length < 8) {
+    redirect(
+      `/settings?error=${encodeURIComponent(
+        "Password must be at least 8 characters.",
+      )}`,
+    );
+  }
+
+  if (password !== confirmPassword) {
+    redirect(
+      `/settings?error=${encodeURIComponent("Passwords do not match.")}`,
+    );
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    redirect(`/settings?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/", "layout");
+
+  redirect("/settings?message=Password%20updated%20successfully.");
 }
 
 export async function signOut() {
