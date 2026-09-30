@@ -133,6 +133,24 @@ export default async function SettingsPage({
               <form action={changePassword} className="grid max-w-md gap-4">
                 <div>
                   <label
+                    htmlFor="settings-current-password"
+                    className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
+                  >
+                    Current password
+                  </label>
+
+                  <input
+                    id="settings-current-password"
+                    name="currentPassword"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    className="w-full rounded-xl border border-stone-200 bg-white/60 px-4 py-3 text-sm text-stone-950 outline-none transition focus:border-stone-400 dark:border-stone-700 dark:bg-stone-950/60 dark:text-white dark:focus:border-stone-500"
+                  />
+                </div>
+
+                <div>
+                  <label
                     htmlFor="settings-password"
                     className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
                   >

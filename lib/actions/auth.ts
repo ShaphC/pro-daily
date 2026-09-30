@@ -180,8 +180,17 @@ export async function updatePassword(formData: FormData) {
 export async function changePassword(formData: FormData) {
   const supabase = await createClient();
 
+  const currentPassword = String(formData.get("currentPassword") ?? "");
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (!currentPassword) {
+    redirect(
+      `/settings?error=${encodeURIComponent(
+        "Please enter your current password.",
+      )}`,
+    );
+  }
 
   if (password.length < 8) {
     redirect(
@@ -205,12 +214,33 @@ export async function changePassword(formData: FormData) {
     redirect("/login");
   }
 
-  const { error } = await supabase.auth.updateUser({
+  if (!user.email) {
+    redirect(
+      `/settings?error=${encodeURIComponent(
+        "Unable to verify your account email.",
+      )}`,
+    );
+  }
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (signInError) {
+    redirect(
+      `/settings?error=${encodeURIComponent(
+        "Your current password is incorrect.",
+      )}`,
+    );
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
     password,
   });
 
-  if (error) {
-    redirect(`/settings?error=${encodeURIComponent(error.message)}`);
+  if (updateError) {
+    redirect(`/settings?error=${encodeURIComponent(updateError.message)}`);
   }
 
   revalidatePath("/", "layout");
